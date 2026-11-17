@@ -78,3 +78,5 @@ Está instalado en el VPS en **`/root/gesetec-presupuestador`** (la convención 
 Antes de correrlo, el subdominio **presupuestos.gesetecalderas.com** tiene que apuntar (registro A) a la IP del VPS. Si el certificado falla por el DNS, se vuelve a correr y listo: no pisa nada.
 
 Backup: la base (`pg_dump gesetec`) y la carpeta de fotos `/var/www/presupuestos.gesetecalderas.com/uploads`.
+
+Acceso a GitHub desde el VPS: deploy key propia (`~/.ssh/gesetec_presupuestador`, con escritura) y el remote `git@github-presupuestador:Aromcho/presupuestador.git`, que usa el `Host github-presupuestador` de `~/.ssh/config`. Si se reinstala el servidor, hay que crear la clave de nuevo y cargarla en GitHub → Settings → Deploy keys.
