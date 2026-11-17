@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+.next-new
+.env
+.env.local
+apps/api/uploads
+*.log
+.DS_Store
+qa/shots
+gesetec-deploy.tar.gz
+_to_delete

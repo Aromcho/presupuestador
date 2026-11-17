@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* ───────── Marca Gesetec (los mismos tokens que gesetecalderas.com) ───────── */
+@theme {
+  --color-noche: #040b1d;
+  --color-marino: #0b1a38;
+  --color-marino-2: #12234a;
+  --color-linea: #1c2c52;
+  --color-linea-2: #2a3d69;
+  --color-rojo: #e3322a;
+  --color-rojo-hover: #f04a40;
+  --color-bordo: #9b1c24;
+  --color-azul: #3371d1;
+  --color-celeste: #b9c8f0;
+  --color-humo: #8a9bc4;
+  --color-whatsapp: #25d366;
+  --color-ok: #7be9a6;
+  --color-alerta: #ff9d97;
+  --color-info: #a9c4f5;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --ease-suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-noche);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grano fino, como en la web */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("/brand/grano.png");
+  background-size: 96px 96px;
+}
+
+::selection {
+  background: var(--color-rojo);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-celeste);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@utility titular {
+  font-stretch: 125%;
+  font-weight: 860;
+  letter-spacing: -0.012em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+@utility titular-medio {
+  font-stretch: 118%;
+  font-weight: 800;
+  letter-spacing: -0.008em;
+  line-height: 1.05;
+}
+@utility etiqueta {
+  font-stretch: 80%;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+@utility degrade-llama {
+  background: linear-gradient(100deg, #6f9df0 0%, var(--color-azul) 30%, var(--color-rojo) 75%, #ff7a4d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hojas (diálogos) como "Pedí tu service" */
+dialog.hoja::backdrop {
+  background: rgb(2 6 18 / 0.72);
+  backdrop-filter: blur(6px);
+}
+dialog.hoja[open] {
+  animation: subir 0.42s var(--ease-suave);
+}
+@keyframes subir {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.llama-viva .llama-mitad {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.llama-viva .llama-azul {
+  animation: latir-azul 4.2s ease-in-out infinite;
+}
+.llama-viva .llama-roja {
+  animation: latir-roja 3.6s ease-in-out infinite;
+}
+@keyframes latir-azul {
+  50% {
+    transform: scale(1.012, 1.035) skewX(-0.8deg);
+  }
+}
+@keyframes latir-roja {
+  45% {
+    transform: scale(1.018, 1.045) skewX(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

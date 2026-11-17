@@ -1,0 +1,19 @@
+# Base de datos para desarrollo: PostgreSQL 16 en el puerto 5434 (Farmacia usa el 5433)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gesetec
+      POSTGRES_PASSWORD: gesetec
+      POSTGRES_DB: gesetec
+    ports:
+      - '127.0.0.1:5434:5432'
+    volumes:
+      - gesetec-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U gesetec']
+      interval: 5s
+      retries: 10
+volumes:
+  gesetec-db:
