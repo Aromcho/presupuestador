@@ -10,3 +10,5 @@ apps/api/uploads
 qa/shots
 gesetec-deploy.tar.gz
 _to_delete
+# Listas de precios de los proveedores (el repo es público)
+recursos
