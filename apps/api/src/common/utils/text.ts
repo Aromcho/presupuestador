@@ -14,3 +14,8 @@ export const slugify = (s: string) =>
 
 /** Parte una búsqueda en palabras: "Peisa  24" → ["peisa", "24"] */
 export const tokens = (q: string) => normalize(q).split(' ').filter(Boolean).slice(0, 8);
+
+/** Prefijos de código a excluir de una lista: "PEI, xyz" → ["PEI", "XYZ"] */
+export function excludePrefixes(t: string | null | undefined): string[] {
+  return (t ?? '').split(/[,;\s]+/).map((s) => s.trim().toUpperCase()).filter(Boolean);
+}

@@ -111,6 +111,8 @@ export const priceLists = pgTable('price_lists', {
   ivaIncluded: boolean('iva_included').notNull().default(true),
   ivaRate: pct('iva_rate').notNull().default(21),
   validFrom: timestamp('valid_from', { withTimezone: true }),
+  /** Prefijos de código que no se importan (separados por coma). Ej.: "PEI" para no traer Peisa desde Hydraulic */
+  excludeCodes: text('exclude_codes'),
   notes: text('notes'),
   active: boolean('active').notNull().default(true),
   createdAt: createdAt(),

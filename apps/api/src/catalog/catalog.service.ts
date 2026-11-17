@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, count, desc, eq, ilike, inArray, sql, SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, inArray, or, sql, SQL } from 'drizzle-orm';
 import { ActivityService } from '../activity/activity.service';
 import { AuthUser } from '../common/decorators/current-user.decorator';
 import { priceOf } from '../common/utils/pricing';
-import { normalize, slugify, tokens } from '../common/utils/text';
+import { excludePrefixes, normalize, slugify, tokens } from '../common/utils/text';
 import { CompanyService } from '../company/company.service';
 import { Database, InjectDb } from '../db/db.module';
 import { brands, Currency, ItemType, items, media, MediaVariants, PriceRule, priceLists } from '../db/schema';
@@ -287,6 +287,7 @@ export class CatalogService {
         ivaRate: priceLists.ivaRate,
         validFrom: priceLists.validFrom,
         notes: priceLists.notes,
+        excludeCodes: priceLists.excludeCodes,
         active: priceLists.active,
         updatedAt: priceLists.updatedAt,
         itemCount: sql<number>`coalesce(${counts.n}, 0)::int`,
@@ -313,6 +314,13 @@ export class CatalogService {
     if (dto.ivaIncluded !== undefined) sync.ivaIncluded = dto.ivaIncluded;
     if (dto.ivaRate !== undefined) sync.ivaRate = dto.ivaRate;
     if (Object.keys(sync).length) await this.db.update(items).set(sync).where(eq(items.priceListId, id));
+    // Códigos excluidos (ej.: Peisa dentro de Hydraulic): se archivan los que ya estaban cargados
+    const prefijos = excludePrefixes(row.excludeCodes);
+    if (prefijos.length)
+      await this.db
+        .update(items)
+        .set({ active: false })
+        .where(and(eq(items.priceListId, id), eq(items.active, true), or(...prefijos.map((pre) => ilike(items.code, `${pre}%`)))));
     await this.activity.log({
       userId: by.id,
       action: 'editar',

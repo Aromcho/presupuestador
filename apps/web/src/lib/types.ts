@@ -69,6 +69,7 @@ export interface PriceList {
   ivaRate: number;
   validFrom: string | null;
   notes: string | null;
+  excludeCodes: string | null;
   active: boolean;
   itemCount: number;
 }

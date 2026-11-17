@@ -54,6 +54,7 @@ export class PriceListDto {
   @IsBoolean() ivaIncluded: boolean;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(100) ivaRate?: number;
   @IsOptional() @IsString() @MaxLength(500) notes?: string | null;
+  @IsOptional() @ValidateIf((_, v) => v !== null) @IsString() @MaxLength(200) excludeCodes?: string | null;
   @IsOptional() @IsBoolean() active?: boolean;
 }
 

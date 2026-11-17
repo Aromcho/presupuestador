@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { and, asc, desc, eq, gte, inArray, lte, sql, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql, SQL } from 'drizzle-orm';
 import ExcelJS from 'exceljs';
 import { ActivityService } from '../activity/activity.service';
 import { CatalogService } from '../catalog/catalog.service';
 import { AuthUser } from '../common/decorators/current-user.decorator';
 import { priceOf } from '../common/utils/pricing';
-import { normalize } from '../common/utils/text';
+import { excludePrefixes, normalize } from '../common/utils/text';
 import { Database, InjectDb } from '../db/db.module';
 import { brands, clients, ItemType, items, priceLists, quoteGroups, QuoteStatus, quotes, users } from '../db/schema';
 import { effectiveStatus, lineTotal, numero } from '../quotes/quotes.service';
@@ -160,6 +160,8 @@ export class ExcelService {
 
     const parsed: ParsedRow[] = [];
     let invalid = 0;
+    let excluded = 0;
+    const prefijos = excludePrefixes(list.excludeCodes);
     const seen = new Set<string>();
     ws.eachRow((row, r) => {
       if (r <= map.headerRow) return;
@@ -168,6 +170,10 @@ export class ExcelService {
       const price = parsePrice(v[map.priceCol]);
       const code = map.codeCol ? cellText(v[map.codeCol]) || null : null;
       if (!name && !code) return;
+      if (code && prefijos.some((pre) => code.toUpperCase().startsWith(pre))) {
+        excluded++;
+        return;
+      }
       if (!name || price == null || price < 0) {
         invalid++;
         return;
@@ -211,7 +217,8 @@ export class ExcelService {
       mapping: map,
       columns,
       list: { id: list.id, name: list.name, currency: list.currency, rule: list.rule, percent: list.percent, ivaIncluded: list.ivaIncluded },
-      totals: { rows: parsed.length, new: pending.newRows.length, changed: pending.changed.length, unchanged: pending.unchanged, invalid },
+      totals: { rows: parsed.length, new: pending.newRows.length, changed: pending.changed.length, unchanged: pending.unchanged, invalid, excluded },
+      excludeCodes: prefijos,
       changed: pending.changed.slice(0, 25).map((c) => ({
         code: c.row.code,
         name: c.row.name,
@@ -257,6 +264,13 @@ export class ExcelService {
           .where(eq(items.id, c.id));
       }
       await tx.update(priceLists).set({ validFrom: new Date() }).where(eq(priceLists.id, p.priceListId));
+      // Lo que la lista excluye (ej.: Peisa dentro de Hydraulic) queda archivado aunque se haya cargado antes
+      const prefijos = excludePrefixes(list.excludeCodes);
+      if (prefijos.length)
+        await tx
+          .update(items)
+          .set({ active: false })
+          .where(and(eq(items.priceListId, p.priceListId), eq(items.active, true), or(...prefijos.map((pre) => ilike(items.code, `${pre}%`)))));
     });
     this.pending.delete(importId);
     await this.activity.log({

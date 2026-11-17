@@ -18,7 +18,8 @@ interface Preview {
   mapping: { sheet: string; headerRow: number; codeCol: number | null; nameCol: number; priceCol: number; typeCol: number | null };
   columns: { col: number; title: string }[];
   list: { id: string; name: string; currency: Currency; rule: PriceRule; percent: number; ivaIncluded: boolean };
-  totals: { rows: number; new: number; changed: number; unchanged: number; invalid: number };
+  totals: { rows: number; new: number; changed: number; unchanged: number; invalid: number; excluded?: number };
+  excludeCodes?: string[];
   changed: { code: string | null; name: string; before: number; after: number; pct: number | null; currencyChanged?: boolean; arsAfter: number }[];
   news: { code: string | null; name: string; price: number; type: ItemType; ars: number }[];
 }
@@ -78,6 +79,7 @@ function Listas() {
                   {l.rule !== 'PRECIO_FIJO' ? ` · ${l.percent}%` : ''}
                 </Pastilla>
                 <Pastilla tono={l.ivaIncluded ? 'gris' : 'rojo'}>{l.ivaIncluded ? 'IVA incluido' : `+ IVA ${l.ivaRate}%`}</Pastilla>
+                {l.excludeCodes && <Pastilla>No trae códigos {l.excludeCodes}</Pastilla>}
               </div>
               <div className="mt-auto flex flex-wrap gap-2">
                 <Boton variante="suave" icono="subir" onClick={() => setImportar(l.id)}>
@@ -111,13 +113,14 @@ function EditarLista({ lista, marcas, onCerrar }: { lista: PriceList | null; mar
     ivaIncluded: lista?.ivaIncluded ?? false,
     ivaRate: String(lista?.ivaRate ?? 21),
     notes: lista?.notes ?? '',
+    excludeCodes: lista?.excludeCodes ?? '',
     active: lista?.active ?? true,
   });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }));
   const guardar = useAccion<void>({
     method: lista ? 'PATCH' : 'POST',
     path: lista ? `/admin/price-lists/${lista.id}` : '/admin/price-lists',
-    body: () => ({ ...f, brandId: f.brandId || null, percent: Number(f.percent.replace(',', '.')) || 0, ivaRate: Number(f.ivaRate) || 21, notes: f.notes || null }),
+    body: () => ({ ...f, brandId: f.brandId || null, percent: Number(f.percent.replace(',', '.')) || 0, ivaRate: Number(f.ivaRate) || 21, notes: f.notes || null, excludeCodes: f.excludeCodes.trim().toUpperCase() || null }),
     invalidate: [['price-lists'], ['items']],
     success: 'Lista guardada',
     onSuccess: onCerrar,
@@ -193,6 +196,13 @@ function EditarLista({ lista, marcas, onCerrar }: { lista: PriceList | null; mar
           </b>{' '}
           final con IVA{f.currency === 'USD' ? ', y se pasa a pesos con el dólar del día' : ''}.
         </p>
+        <Campo
+          etiqueta="No traer los códigos que empiecen con"
+          placeholder="Ej.: PEI"
+          value={f.excludeCodes}
+          onChange={(e) => set('excludeCodes', e.target.value)}
+          ayuda="Para firmas que cotizás con otra lista. Separalos con coma. Al importar se saltean solos y los que ya estaban se archivan."
+        />
         <Area etiqueta="Notas" value={f.notes} onChange={(e) => set('notes', e.target.value)} />
         {lista && <Interruptor activo={f.active} onCambio={(v) => set('active', v)} etiqueta="Lista activa" />}
       </div>
@@ -313,6 +323,7 @@ function Importar({ listas, inicial, onCerrar }: { listas: PriceList[]; inicial:
             <Pastilla tono="azul">{vista.totals.changed} cambian de precio</Pastilla>
             <Pastilla>{vista.totals.unchanged} sin cambios</Pastilla>
             {vista.totals.invalid > 0 && <Pastilla tono="rojo">{vista.totals.invalid} filas sin precio (se saltean)</Pastilla>}
+            {!!vista.totals.excluded && <Pastilla>{vista.totals.excluded} con código {vista.excludeCodes?.join(', ')} (no se cargan)</Pastilla>}
           </div>
           <div className="grid gap-3 rounded-2xl border border-linea bg-noche p-4 sm:grid-cols-2">
             <p className="text-sm text-celeste sm:col-span-2">
