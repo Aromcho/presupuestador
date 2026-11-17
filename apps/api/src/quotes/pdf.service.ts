@@ -139,10 +139,22 @@ export class PdfService {
         doc.rect(0, 0, W, 124).fill(C.marino);
         if (logo) doc.image(logo, M, 30, { height: 62 });
         else font('x', 22, '#ffffff').text(empresa.nombre, M, 46);
-        const rx = W - M - 230;
-        etiqueta('Presupuesto', rx, 38, C.celeste, { width: 230, align: 'right' });
-        font('x', 17, '#ffffff').text(fechaLarga(fecha), rx, 52, { width: 230, align: 'right', lineBreak: false });
-        font('r', 9, C.celeste).text(`Válido por ${q.validityHours} hs`, rx, 76, { width: 230, align: 'right', lineBreak: false });
+        // Fecha y validez grandes (pedido de Leo): la fecha se achica sola si no entra
+        const rw = 290;
+        const rx = W - M - rw;
+        etiqueta('Presupuesto', rx, 26, C.celeste, { width: rw, align: 'right' });
+        const ft = fechaLarga(fecha);
+        let fs = 23;
+        doc.font('x');
+        while (fs > 15 && doc.fontSize(fs).widthOfString(ft) > rw) fs -= 0.5;
+        font('x', fs, '#ffffff').text(ft, rx, 40, { width: rw, align: 'right', lineBreak: false });
+        const vt = `Válido por ${q.validityHours} horas`;
+        doc.font('x').fontSize(12.5);
+        const ph = 26;
+        const pw = doc.widthOfString(vt) + 30;
+        const px = W - M - pw;
+        doc.roundedRect(px, 76, pw, ph, ph / 2).fill(C.rojo);
+        font('x', 12.5, '#ffffff').text(vt, px, 76 + 7, { width: pw, align: 'center', lineBreak: false });
         degrade(124, 4);
         return 152;
       }
