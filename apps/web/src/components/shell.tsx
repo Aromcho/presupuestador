@@ -93,11 +93,13 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="mt-auto flex flex-col gap-3">
           <DolarChip className="self-start" />
           <div className="flex items-center gap-3 rounded-2xl border border-linea bg-marino-2 p-3">
-            <span className="titular-medio grid size-10 shrink-0 place-items-center rounded-full bg-noche">{me.data.name.slice(0, 1)}</span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">{me.data.name}</p>
-              <p className="text-xs text-humo">{admin ? 'Administrador' : 'Ventas'}</p>
-            </div>
+            <Link href="/cuenta" title="Mi cuenta" className="flex min-w-0 flex-1 items-center gap-3">
+              <span className="titular-medio grid size-10 shrink-0 place-items-center rounded-full bg-noche">{me.data.name.slice(0, 1)}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold">{me.data.name}</span>
+                <span className="block text-xs text-humo">{admin ? 'Administrador' : 'Ventas'} · Mi cuenta</span>
+              </span>
+            </Link>
             <button type="button" onClick={salir} aria-label="Salir" title="Salir" className="grid size-10 place-items-center rounded-xl text-celeste hover:bg-white/5 hover:text-white">
               <Icono nombre="salir" className="size-[1.15rem]" />
             </button>
@@ -112,6 +114,9 @@ export function Shell({ children }: { children: ReactNode }) {
             <img src="/brand/gesetec-logo.svg" alt="Gesetec Calderas" className="h-9 w-auto" />
           </Link>
           <DolarChip />
+          <Link href="/cuenta" aria-label="Mi cuenta" className="grid size-11 place-items-center rounded-full border border-linea text-celeste">
+            <Icono nombre="usuario" className="size-[1.1rem]" />
+          </Link>
           <button type="button" onClick={salir} aria-label="Salir" className="grid size-11 place-items-center rounded-full border border-linea text-celeste">
             <Icono nombre="salir" className="size-[1.1rem]" />
           </button>
