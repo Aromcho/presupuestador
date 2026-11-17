@@ -10,7 +10,8 @@ import { QuoteQuery, SaveQuoteDto, StatusDto } from './quotes.dto';
 import { QuoteDetail, QuotesService } from './quotes.service';
 
 function sendPdf(res: Response, pdf: Buffer, q: QuoteDetail, download: boolean) {
-  const name = `Presupuesto-${q.numberLabel}-Gesetec.pdf`;
+  const cliente = (q.client?.name ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const name = `Presupuesto-Gesetec${cliente ? `-${cliente}` : ''}.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${name}"`);
   res.setHeader('Cache-Control', 'private, no-store');

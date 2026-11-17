@@ -344,7 +344,7 @@ export class QuotesService {
     const nombre = q.client?.name.trim().split(/\s+/)[0] ?? '';
     const horas = q.validityHours;
     const text = [
-      `Hola${nombre ? ` ${nombre}` : ''}, ¿cómo estás? Te paso el presupuesto N° ${numero(q.number)} de ${empresa.nombre}: ${q.title}.`,
+      `Hola${nombre ? ` ${nombre}` : ''}, ¿cómo estás? Te paso el presupuesto de ${empresa.nombre}: ${q.title}.`,
       '',
       `Lo podés ver y descargar en PDF acá: ${url}`,
       '',

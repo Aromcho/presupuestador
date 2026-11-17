@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import PDFDocument from 'pdfkit';
 import sharp from 'sharp';
 import { AjustesPresupuestos, CompanyService, Empresa } from '../company/company.service';
+import { slugify } from '../common/utils/text';
 import { PRODUCT_TYPES } from '../db/schema';
 import type { QuoteDetail } from './quotes.service';
 
@@ -30,6 +31,13 @@ const BOTTOM = H - 66;
 const FONTS = { r: '400', s: '600', b: '700', x: '800' } as const;
 type Font = keyof typeof FONTS;
 
+// Íconos de trazo (24×24) para la franja de contacto
+const ICONOS = {
+  chat: 'M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z',
+  camara: 'M4.5 7.5h3l1.6-2.5h5.8l1.6 2.5h3a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5zM12 16.6a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8z',
+  globo: 'M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5z',
+};
+
 const pesos = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 const cantidad = (n: number) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(n);
 const fechaLarga = (d: Date) => new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' }).format(d);
@@ -50,6 +58,19 @@ export class PdfService {
 
   private get uploads() {
     return resolve(this.config.get<string>('UPLOADS_DIR') ?? './uploads');
+  }
+
+  /** Logos blancos de las marcas (los mismos de gesetecalderas.com), en el orden de Empresa → marcas */
+  private marcas(nombres: string[]) {
+    const out: { buf: Buffer; ratio: number }[] = [];
+    for (const n of nombres) {
+      const file = resolve(__dirname, '../../assets/marcas', `${slugify(n)}.png`);
+      if (!existsSync(file)) continue;
+      const buf = readFileSync(file);
+      // ancho/alto desde el encabezado PNG
+      out.push({ buf, ratio: buf.readUInt32BE(16) / buf.readUInt32BE(20) });
+    }
+    return out;
   }
 
   private logoPng() {
@@ -94,7 +115,7 @@ export class PdfService {
       size: 'A4',
       margins: { top: M, bottom: 20, left: M, right: M },
       bufferPages: true,
-      info: { Title: `Presupuesto N° ${q.numberLabel} · ${empresa.nombre}`, Author: empresa.nombre, Subject: q.title },
+      info: { Title: `Presupuesto · ${empresa.nombre}`, Author: empresa.nombre, Subject: q.title },
     });
     for (const [k, w] of Object.entries(FONTS)) doc.registerFont(k, require.resolve(`@fontsource/archivo/files/archivo-latin-${w}-normal.woff`));
     const chunks: Buffer[] = [];
@@ -119,15 +140,15 @@ export class PdfService {
         if (logo) doc.image(logo, M, 30, { height: 62 });
         else font('x', 22, '#ffffff').text(empresa.nombre, M, 46);
         const rx = W - M - 230;
-        etiqueta('Presupuesto', rx, 34, C.celeste, { width: 230, align: 'right' });
-        font('x', 28, '#ffffff').text(`N° ${q.numberLabel}`, rx, 46, { width: 230, align: 'right', lineBreak: false });
-        font('r', 9, C.celeste).text(`${fechaLarga(fecha)} · Válido ${q.validityHours} hs`, rx, 84, { width: 230, align: 'right', lineBreak: false });
+        etiqueta('Presupuesto', rx, 38, C.celeste, { width: 230, align: 'right' });
+        font('x', 17, '#ffffff').text(fechaLarga(fecha), rx, 52, { width: 230, align: 'right', lineBreak: false });
+        font('r', 9, C.celeste).text(`Válido por ${q.validityHours} hs`, rx, 76, { width: 230, align: 'right', lineBreak: false });
         degrade(124, 4);
         return 152;
       }
       doc.rect(0, 0, W, 50).fill(C.marino);
       if (logo) doc.image(logo, M, 13, { height: 24 });
-      font('s', 9, C.celeste).text(`Presupuesto N° ${q.numberLabel} · continuación`, W - M - 250, 21, { width: 250, align: 'right', lineBreak: false });
+      font('s', 9, C.celeste).text(`Presupuesto · ${fechaLarga(fecha)} · continuación`, W - M - 250, 21, { width: 250, align: 'right', lineBreak: false });
       degrade(50, 3);
       return 74;
     };
@@ -143,18 +164,14 @@ export class PdfService {
     // ---------------------------------------------------------- cliente
     const c = q.client;
     etiqueta('Para', M, y);
-    font('b', 14).text(c?.name ?? 'Cliente', M, y + 12, { width: CW * 0.6 - 10 });
+    font('b', 14).text(c?.name ?? 'Cliente', M, y + 12, { width: CW });
     let yc = doc.y + 2;
     const datos = [c?.phone, c?.zone, c?.address].filter(Boolean).join(' · ');
     if (datos) {
-      font('r', 9.5, C.gris).text(datos, M, yc, { width: CW * 0.6 - 10 });
+      font('r', 9.5, C.gris).text(datos, M, yc, { width: CW });
       yc = doc.y;
     }
-    const rx = M + CW * 0.62;
-    etiqueta('Atiende', rx, y);
-    font('s', 11).text(q.user?.name ?? empresa.nombre, rx, y + 12, { width: CW * 0.38 });
-    font('r', 9.5, C.gris).text(`WhatsApp ${empresa.telefono}`, rx, doc.y + 1, { width: CW * 0.38 });
-    y = Math.max(yc, doc.y) + 18;
+    y = yc + 18;
 
     // ---------------------------------------------------------- título
     font('x', 20).text(q.title, M, y, { width: CW });
@@ -228,7 +245,7 @@ export class PdfService {
       font('x', 24, '#ffffff').text(pesos(total), M + CW / 2 - 18, y + 16, { width: CW / 2, align: 'right', lineBreak: false });
       y += 58;
     }
-    y += 22;
+    y += 18;
 
     // ---------------------------------------------------------- se incluye
     if (q.seIncluye.length) {
@@ -283,9 +300,55 @@ export class PdfService {
       y = doc.y + 10;
     }
 
+    // ---------------------------------------------------------- contacto y marcas (al pie de la última página)
+    const logos = this.marcas(empresa.marcas);
+    const bandH = logos.length ? 112 : 66;
+    const limite = H - 58; // justo arriba del pie
+    if (y + bandH + 4 > limite) {
+      doc.addPage();
+      y = encabezado(false);
+    }
+    const by = Math.max(y + 4, limite - bandH);
+    doc.roundedRect(M, by, CW, bandH, 14).fill(C.marino);
+    const contactos = [
+      { icono: ICONOS.chat, color: '#25D366', etiqueta: 'WhatsApp', valor: empresa.telefono, url: empresa.whatsapp ? `https://wa.me/${empresa.whatsapp.replace(/\D/g, '')}` : '' },
+      { icono: ICONOS.camara, color: C.rojo, etiqueta: 'Instagram', valor: empresa.instagram ? `@${empresa.instagram.replace(/^@/, '')}` : '', url: empresa.instagram ? `https://instagram.com/${empresa.instagram.replace(/^@/, '')}` : '' },
+      { icono: ICONOS.globo, color: C.azul, etiqueta: 'Web', valor: empresa.web, url: empresa.web ? `https://${empresa.web.replace(/^https?:\/\//, '')}` : '' },
+    ].filter((x) => x.valor);
+    const colW = (CW - 36) / Math.max(contactos.length, 1);
+    contactos.forEach((k, i) => {
+      const x = M + 18 + i * colW;
+      const cy = by + 15;
+      doc.circle(x + 15, cy + 15, 15).fill(k.color);
+      doc.save();
+      doc.translate(x + 15 - 9, cy + 15 - 9).scale(18 / 24);
+      doc.path(k.icono).lineWidth(2).lineCap('round').lineJoin('round').stroke('#ffffff');
+      doc.restore();
+      etiqueta(k.etiqueta, x + 38, cy + 3, C.celeste);
+      const ancho = colW - 42;
+      let size = 12;
+      while (size > 8.5 && font('b', size).widthOfString(k.valor) > ancho) size -= 0.5;
+      font('b', size, '#ffffff').text(k.valor, x + 38, cy + 14, { width: ancho + 4, lineBreak: false });
+      if (k.url) doc.link(x, cy, colW - 6, 30, k.url);
+    });
+    if (logos.length) {
+      const ly = by + 55;
+      doc.moveTo(M + 18, ly).lineTo(W - M - 18, ly).lineWidth(0.6).strokeColor('#1C2C52').stroke();
+      etiqueta('Marcas con las que trabajamos', M + 18, ly + 10, C.celeste);
+      const gap = 18;
+      const inner = CW - 36;
+      const h = Math.min(18, (inner - gap * (logos.length - 1)) / logos.reduce((a, l) => a + l.ratio, 0));
+      const total = logos.reduce((a, l) => a + l.ratio * h, 0) + gap * (logos.length - 1);
+      let lx = M + 18 + (inner - total) / 2;
+      for (const l of logos) {
+        doc.image(l.buf, lx, ly + 25 + (18 - h) / 2, { height: h });
+        lx += l.ratio * h + gap;
+      }
+    }
+
     // ---------------------------------------------------------- pie en todas las páginas
     const range = doc.bufferedPageRange();
-    const contacto = [empresa.nombre, [empresa.direccion, empresa.localidad].filter(Boolean).join(', '), `WhatsApp ${empresa.telefono}`, empresa.web, empresa.instagram && `@${empresa.instagram.replace(/^@/, '')}`]
+    const contacto = [empresa.nombre, [empresa.direccion, empresa.localidad].filter(Boolean).join(', '), `WhatsApp ${empresa.telefono}`, empresa.web]
       .filter(Boolean)
       .join(' · ');
     const zonas = empresa.zonas.length ? `${ajustes.pie ? `${ajustes.pie} · ` : ''}Trabajamos en ${empresa.zonas.join(', ')}.` : ajustes.pie;
