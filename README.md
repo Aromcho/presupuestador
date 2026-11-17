@@ -65,7 +65,11 @@ Otros comandos: `npm run build` (compila API y panel), `npm run start` (corre lo
 
 ## Producción (VPS)
 
-Igual que Brox: doble clic en **`Subir a presupuestos.gesetecalderas.com.bat`**, poné `root@IP-del-VPS` y listo. Empaqueta el proyecto, lo sube a `/var/www/gesetec-presupuestador` y corre `deploy/install.sh`, que:
+Está instalado en el VPS en **`/root/gesetec-presupuestador`** (la convención del servidor: código en `/root/<proyecto>`), clonado de `github.com/Aromcho/presupuestador`. Las fotos van en **`/var/www/presupuestos.gesetecalderas.com/uploads`**, porque Nginx no puede leer `/root` (`UPLOADS_DIR` en `apps/api/.env`).
+
+**Actualizar** (lo de todos los días): `git push` desde la PC y después el deploy **`presupuestador`** del MCP del VPS (desde Claude), que hace `git pull --ff-only && bash deploy/update.sh`: compila al costado, migra y recarga sin cortar. También sirve **`Actualizar presupuestos.gesetecalderas.com.bat`**, que hace lo mismo por SSH.
+
+**Instalar desde cero** (un servidor nuevo o una reinstalación): **`Subir a presupuestos.gesetecalderas.com.bat`**, con `root@IP-del-VPS`. Clona el repo en `/root/gesetec-presupuestador` (o lo actualiza si ya está) y corre `deploy/install.sh`, que:
 - chequea Node, PM2, Nginx y Certbot, y que los puertos **4130** (API) y **3130** (panel) estén libres;
 - crea la base `gesetec` en el PostgreSQL del servidor (o en Docker si no hay) y los `.env` con secretos y **contraseñas nuevas** (las muestra al final: anotalas);
 - instala, compila, migra, carga los datos iniciales y arranca `gesetec-api` y `gesetec-web` con PM2;
@@ -73,4 +77,4 @@ Igual que Brox: doble clic en **`Subir a presupuestos.gesetecalderas.com.bat`**,
 
 Antes de correrlo, el subdominio **presupuestos.gesetecalderas.com** tiene que apuntar (registro A) a la IP del VPS. Si el certificado falla por el DNS, se vuelve a correr y listo: no pisa nada.
 
-Para actualizar: **`Actualizar presupuestos.gesetecalderas.com.bat`** (corre `deploy/update.sh`, compila al costado y recarga sin cortar). Las fotos quedan en `apps/api/uploads`: hacer backup junto con la base (`pg_dump gesetec`).
+Backup: la base (`pg_dump gesetec`) y la carpeta de fotos `/var/www/presupuestos.gesetecalderas.com/uploads`.

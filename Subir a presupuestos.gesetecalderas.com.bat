@@ -11,15 +11,15 @@ where ssh >nul 2>nul || (echo  Falta el cliente SSH de Windows: Configuracion ^>
 set /p SERVER= Usuario e IP del VPS (ej: root@123.45.67.89): 
 if "%SERVER%"=="" exit /b 1
 echo.
-echo  1/3 Empaquetando el proyecto...
-if exist gesetec-deploy.tar.gz del gesetec-deploy.tar.gz
-tar -czf gesetec-deploy.tar.gz --exclude=node_modules --exclude=.next --exclude=.next-new --exclude=dist --exclude=.env --exclude=.env.local --exclude=uploads apps deploy scripts package.json package-lock.json docker-compose.yml README.md PLAN.md || goto error
+echo  1/2 Subiendo tus cambios a GitHub (Aromcho/presupuestador)...
+git push || goto error
+rem Instalacion desde cero o reinstalacion. Para las actualizaciones de todos los dias usa "Actualizar presupuestos.gesetecalderas.com.bat" o el deploy "presupuestador" desde Claude.
 echo.
-echo  2/3 Subiendo...
-scp gesetec-deploy.tar.gz %SERVER%:/tmp/gesetec-deploy.tar.gz || goto error
+echo  2/2 Instalando en el servidor, en /root/gesetec-presupuestador (unos 5 minutos)...
+ssh -t %SERVER% "test -d /root/gesetec-presupuestador/.git || git clone https://github.com/Aromcho/presupuestador.git /root/gesetec-presupuestador; cd /root/gesetec-presupuestador && git checkout -- apps/web/tsconfig.json 2>/dev/null; git pull --ff-only && sudo bash deploy/install.sh presupuestos.gesetecalderas.com" || goto error
 echo.
-echo  3/3 Instalando en el servidor (unos 5 minutos)...
-ssh -t %SERVER% "mkdir -p /var/www/gesetec-presupuestador && tar -xzf /tmp/gesetec-deploy.tar.gz -C /var/www/gesetec-presupuestador && cd /var/www/gesetec-presupuestador && sudo bash deploy/install.sh presupuestos.gesetecalderas.com" || goto error
+rem install.sh se puede volver a correr: no pisa los .env, la base ni las fotos.
+echo  Si el certificado HTTPS fallo, revisa el DNS y volve a correr este archivo.
 echo.
 echo  Listo: https://presupuestos.gesetecalderas.com
 echo  Anota las contrasenas que aparecen arriba.

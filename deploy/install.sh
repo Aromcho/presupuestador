@@ -9,6 +9,8 @@ set -euo pipefail
 DOMAIN="${1:-presupuestos.gesetecalderas.com}"
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 API_PORT="${GESETEC_API_PORT:-4130}"; WEB_PORT="${GESETEC_WEB_PORT:-3130}"
+# Las fotos van fuera del código: Nginx (www-data) no puede leer /root, donde vive el proyecto
+UPLOADS_DIR="${GESETEC_UPLOADS_DIR:-/var/www/$DOMAIN/uploads}"
 cd "$DIR"
 say() { printf '\n\033[1;31m▸\033[0m %s\n' "$*"; }
 rnd() { head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32; }
@@ -55,6 +57,7 @@ if [ ! -f apps/api/.env ]; then
       -e "s#^COOKIE_SECURE=.*#COOKIE_SECURE=true#" \
       -e "s#^ADMIN_PASSWORD=.*#ADMIN_PASSWORD=$ADMIN_PASS#" \
       -e "s#^VENTAS_PASSWORD=.*#VENTAS_PASSWORD=$VENTAS_PASS#" \
+      -e "s#^UPLOADS_DIR=.*#UPLOADS_DIR=$UPLOADS_DIR#" \
       apps/api/.env.example > apps/api/.env
   sed -e "s#^API_URL=.*#API_URL=http://127.0.0.1:$API_PORT#" apps/web/.env.example > apps/web/.env.local
   chmod 600 apps/api/.env apps/web/.env.local
@@ -62,16 +65,21 @@ if [ ! -f apps/api/.env ]; then
   Administración: administracion@gesetecalderas.com / $VENTAS_PASS"
 fi
 
+# La carpeta de fotos real es la del .env (en una instalación existente puede ser otra)
+UPLOADS_DIR="$(grep -E '^UPLOADS_DIR=' apps/api/.env | cut -d= -f2- | tr -d '"' || true)"
+UPLOADS_DIR="${UPLOADS_DIR:-./uploads}"
+case "$UPLOADS_DIR" in /*) ;; *) UPLOADS_DIR="$DIR/apps/api/${UPLOADS_DIR#./}" ;; esac
+mkdir -p "$UPLOADS_DIR"
+
 say "Instalando dependencias"
 npm ci --no-audit --no-fund
 say "Compilando la API, migrando y cargando los datos iniciales"
 npm run build -w apps/api
 npm run db:migrate:prod -w apps/api
 (cd apps/api && npx tsx src/db/seed.ts)   # no pisa nada si ya hay datos
-mkdir -p apps/api/uploads
-# Nginx (www-data) sirve /uploads directo del disco: que pueda leerlo
-chmod a+x "$DIR" "$DIR/apps" "$DIR/apps/api" 2>/dev/null || true
-chmod -R a+rX "$DIR/apps/api/uploads"
+# Nginx (www-data) sirve /uploads directo del disco: que pueda leer la carpeta de fotos
+chmod a+x "$(dirname "$UPLOADS_DIR")" 2>/dev/null || true
+chmod -R a+rX "$UPLOADS_DIR"
 
 say "Compilando el panel"
 API_URL="http://127.0.0.1:${API_PORT}" npm run build -w apps/web   # las rewrites de Next se fijan al compilar
@@ -83,7 +91,7 @@ pm2 save
 say "Nginx: sitio propio del presupuestador"
 CONF=/etc/nginx/sites-available/gesetec-presupuestos
 if [ ! -f "$CONF" ] || ! grep -q "managed by Certbot" "$CONF"; then
-  sed -e "s#DOMINIO#$DOMAIN#g" -e "s#RUTA#$DIR#g" -e "s#127.0.0.1:3130#127.0.0.1:$WEB_PORT#" -e "s#127.0.0.1:4130#127.0.0.1:$API_PORT#" deploy/nginx-presupuestos.conf > "$CONF"
+  sed -e "s#DOMINIO#$DOMAIN#g" -e "s#UPLOADS#$UPLOADS_DIR#g" -e "s#127.0.0.1:3130#127.0.0.1:$WEB_PORT#" -e "s#127.0.0.1:4130#127.0.0.1:$API_PORT#" deploy/nginx-presupuestos.conf > "$CONF"
   ln -sf "$CONF" /etc/nginx/sites-enabled/gesetec-presupuestos
 fi
 nginx -t && systemctl reload nginx
