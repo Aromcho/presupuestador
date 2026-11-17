@@ -9,6 +9,8 @@ const RULES = ['COSTO_MAS_MARGEN', 'LISTA_MENOS_DESCUENTO', 'PRECIO_FIJO'];
 export class ItemQueryDto {
   @ApiPropertyOptional({ description: 'Busca por código, nombre o marca (sin acentos). Ej.: "peisa 24"' })
   @IsOptional() @IsString() @MaxLength(120) q?: string;
+  @ApiPropertyOptional({ description: 'Ids separados por coma (para precargar los ítems de una plantilla)' })
+  @IsOptional() @IsString() @MaxLength(4000) ids?: string;
   @IsOptional() @IsIn(TYPES) type?: ItemType;
   @IsOptional() @IsUUID() brandId?: string;
   @IsOptional() @IsUUID() priceListId?: string;

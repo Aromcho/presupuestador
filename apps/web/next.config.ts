@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     return [
       { source: '/api/:path*', destination: `${API_URL}/api/:path*` },
       { source: '/uploads/:path*', destination: `${API_URL}/uploads/:path*` },
+      // Link público del presupuesto que recibe el cliente por WhatsApp
+      { source: '/p/:token', destination: `${API_URL}/api/p/:token` },
     ];
   },
   async headers() {

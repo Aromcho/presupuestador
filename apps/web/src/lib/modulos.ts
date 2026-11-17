@@ -15,6 +15,8 @@ export interface Modulo {
 }
 
 export const MODULOS: Modulo[] = [
+  { id: 'presupuestos', nombre: 'Presupuestos', descripcion: 'Historial con estados, duplicar, reenviar y exportar a Excel.', icono: 'doc', ruta: '/presupuestos', estado: 'activo', rol: 'ADMIN' },
+  { id: 'clientes', nombre: 'Clientes', descripcion: 'Ficha de cada cliente con sus presupuestos y su WhatsApp.', icono: 'clientes', ruta: '/clientes', estado: 'activo', rol: 'ADMIN' },
   { id: 'catalogo', nombre: 'Catálogo y precios', descripcion: 'Equipos, repuestos, mano de obra y materiales con su precio final.', icono: 'etiqueta', ruta: '/catalogo', estado: 'activo', rol: 'ADMIN' },
   { id: 'listas', nombre: 'Listas de precios y Excel', descripcion: 'Listas en dólares o pesos, con ganancia o beneficio. Importá y exportá Excel.', icono: 'excel', ruta: '/admin/listas', estado: 'activo', rol: 'ADMIN' },
   { id: 'plantillas', nombre: 'Plantillas y notas', descripcion: 'Lo que incluye cada venta y las aclaraciones que se agregan solas.', icono: 'plantilla', ruta: '/admin/plantillas', estado: 'activo', rol: 'ADMIN' },

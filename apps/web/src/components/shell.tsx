@@ -14,12 +14,14 @@ import { Cargando } from './ui';
 type Nav = { href: string; texto: string; icono: IconoNombre; admin?: boolean };
 const NAV: Nav[] = [
   { href: '/', texto: 'Inicio', icono: 'inicio' },
-  { href: '/presupuestos/nuevo', texto: 'Presupuestos', icono: 'doc' },
+  { href: '/presupuestos', texto: 'Presupuestos', icono: 'doc' },
+  { href: '/clientes', texto: 'Clientes', icono: 'clientes' },
   { href: '/catalogo', texto: 'Catálogo', icono: 'etiqueta' },
   { href: '/admin', texto: 'Administración', icono: 'ajustes', admin: true },
 ];
 
-const activo = (pathname: string, href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+const activo = (pathname: string, href: string) =>
+  href === '/' ? pathname === '/' : href === '/presupuestos' ? pathname.startsWith(href) && !pathname.startsWith('/presupuestos/nuevo') : pathname.startsWith(href);
 
 /** Dólar BNA venta del momento, visible en todo el panel */
 export function DolarChip({ className }: { className?: string }) {
@@ -132,18 +134,12 @@ export function Shell({ children }: { children: ReactNode }) {
             <Icono nombre="mas" className="size-7" />
           </span>
         </Link>
-        {(admin ? [NAV[2], NAV[3]] : [NAV[2]]).map((n) => (
+        {(admin ? [NAV[3], NAV[4]] : [NAV[3], NAV[2]]).map((n) => (
           <Link key={n.href} href={n.href} className={cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[0.7rem]', activo(pathname, n.href) ? 'font-bold text-white' : 'text-humo')}>
             <Icono nombre={n.icono} className="size-[1.4rem]" />
             {n.admin ? 'Admin' : n.texto}
           </Link>
         ))}
-        {!admin && (
-          <button type="button" onClick={salir} className="flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[0.7rem] text-humo">
-            <Icono nombre="salir" className="size-[1.4rem]" />
-            Salir
-          </button>
-        )}
       </nav>
     </div>
   );

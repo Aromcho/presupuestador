@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { FilaPresupuesto } from '@/components/FilaPresupuesto';
 import { Icono, type IconoNombre } from '@/components/Icono';
 import { Llama } from '@/components/Llama';
 import { BotonLink, Etiqueta, Tarjeta } from '@/components/ui';
 import { useApi, useDolar, useMe } from '@/lib/api';
 import { fechaHora, pesos, TIPOS } from '@/lib/format';
-import type { ItemType, Template } from '@/lib/types';
+import type { ItemType, Paged, QuoteRow, QuoteStats, Template } from '@/lib/types';
 
 const saludo = () => {
   const h = Number(new Date().toLocaleString('es-AR', { hour: 'numeric', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }));
@@ -18,6 +19,8 @@ export default function Inicio() {
   const dolar = useDolar();
   const plantillas = useApi<Template[]>(['templates'], '/templates');
   const stats = useApi<Partial<Record<ItemType, number>>>(['items', 'stats'], '/items/stats');
+  const ultimos = useApi<Paged<QuoteRow>>(['quotes', 'ultimos'], '/quotes?limit=5');
+  const qs = useApi<QuoteStats>(['quotes', 'stats'], '/quotes/stats');
   const admin = me.data?.role === 'ADMIN';
   const nombre = me.data?.name.split(' ')[0] ?? '';
   const totalItems = Object.values(stats.data ?? {}).reduce((a, b) => a + (b ?? 0), 0);
@@ -58,6 +61,40 @@ export default function Inicio() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section aria-labelledby="ult-t" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="ult-t" className="titular-medio text-2xl">
+              Últimos presupuestos
+            </h2>
+            {qs.data && (
+              <p className="mt-1 text-sm text-celeste">
+                Este mes: {qs.data.creados} armado{qs.data.creados === 1 ? '' : 's'} · {qs.data.enviados} enviado{qs.data.enviados === 1 ? '' : 's'} · {qs.data.aceptados} aceptado{qs.data.aceptados === 1 ? '' : 's'}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(qs.data?.seguir ?? 0) > 0 && (
+              <BotonLink href="/presupuestos?estado=SEGUIR" variante="suave" icono="reloj">
+                {qs.data!.seguir} sin respuesta
+              </BotonLink>
+            )}
+            <BotonLink href="/presupuestos" variante="contorno">
+              Ver todos
+            </BotonLink>
+          </div>
+        </div>
+        {ultimos.data && ultimos.data.items.length > 0 ? (
+          <div className="flex flex-col gap-2.5">
+            {ultimos.data.items.map((r) => (
+              <FilaPresupuesto key={r.id} r={r} />
+            ))}
+          </div>
+        ) : (
+          ultimos.data && <p className="rounded-2xl border border-dashed border-linea-2 px-5 py-6 text-celeste">Todavía no armaste ninguno. Tocá «Empezar» y en 3 pasos lo tenés listo para mandar por WhatsApp.</p>
+        )}
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">

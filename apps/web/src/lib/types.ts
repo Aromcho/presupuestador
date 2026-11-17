@@ -125,3 +125,100 @@ export interface Activity {
   summary: string | null;
   createdAt: string;
 }
+
+export type QuoteMode = 'SUMA' | 'COMPARATIVA';
+export type QuoteStatus = 'BORRADOR' | 'ENVIADO' | 'ACEPTADO' | 'RECHAZADO' | 'VENCIDO';
+
+export interface Client {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  zone: string | null;
+  address: string | null;
+  notes?: string | null;
+  quoteCount?: number;
+  lastQuoteAt?: string | null;
+}
+
+export interface QuoteLine {
+  id: string;
+  itemId: string | null;
+  type: ItemType;
+  code: string | null;
+  name: string;
+  description: string | null;
+  photo: string | null;
+  unitPrice: number;
+  qty: number;
+  discountPct: number;
+  ivaIncluded: boolean;
+  total: number;
+  usd: boolean;
+}
+
+export interface QuoteGroup {
+  id: string;
+  label: string;
+  items: QuoteLine[];
+  total: number;
+}
+
+export interface Quote {
+  id: string;
+  number: number;
+  numberLabel: string;
+  title: string;
+  mode: QuoteMode;
+  status: QuoteStatus;
+  rawStatus: QuoteStatus;
+  templateId: string | null;
+  template: { id: string; name: string; slug: string } | null;
+  client: Client | null;
+  user: { id: string; name: string } | null;
+  validityHours: number;
+  paymentTerms: string | null;
+  seIncluye: string[];
+  notes: string[];
+  observations: string | null;
+  dollarSell: number | null;
+  dollarAt: string | null;
+  sentAt: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  groups: QuoteGroup[];
+  total: number | null;
+  usesDollar: boolean;
+  share: { token: string; url: string; expiresAt: string } | null;
+}
+
+export interface QuoteRow {
+  id: string;
+  number: number;
+  numberLabel: string;
+  title: string;
+  mode: QuoteMode;
+  status: QuoteStatus;
+  createdAt: string;
+  sentAt: string | null;
+  client: { id: string; name: string; phone: string | null; zone: string | null } | null;
+  userName: string | null;
+  groups: { label: string; total: number; count: number }[];
+  total: number | null;
+}
+
+export interface QuoteStats {
+  creados: number;
+  enviados: number;
+  aceptados: number;
+  seguir: number;
+  borradores: number;
+}
+
+export interface SendResult {
+  url: string;
+  text: string;
+  phone: string;
+  whatsappUrl: string;
+}

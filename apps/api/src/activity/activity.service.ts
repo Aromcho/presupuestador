@@ -5,7 +5,7 @@ import { activity } from '../db/schema';
 
 export interface LogEntry {
   userId?: string | null;
-  action: 'crear' | 'editar' | 'borrar' | 'importar' | 'actualizar-precios' | 'dolar';
+  action: 'crear' | 'editar' | 'borrar' | 'importar' | 'actualizar-precios' | 'dolar' | 'enviar';
   entity: string;
   entityId?: string | null;
   summary: string;

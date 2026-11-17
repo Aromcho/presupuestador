@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { and, asc, eq, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lte, sql, SQL } from 'drizzle-orm';
 import ExcelJS from 'exceljs';
 import { ActivityService } from '../activity/activity.service';
 import { CatalogService } from '../catalog/catalog.service';
@@ -8,10 +8,12 @@ import { AuthUser } from '../common/decorators/current-user.decorator';
 import { priceOf } from '../common/utils/pricing';
 import { normalize } from '../common/utils/text';
 import { Database, InjectDb } from '../db/db.module';
-import { brands, ItemType, items, priceLists } from '../db/schema';
+import { brands, clients, ItemType, items, priceLists, quoteGroups, QuoteStatus, quotes, users } from '../db/schema';
+import { effectiveStatus, lineTotal, numero } from '../quotes/quotes.service';
 
 const NOCHE = 'FF040B1D';
 const RULE_LABEL = { COSTO_MAS_MARGEN: 'Costo + ganancia', LISTA_MENOS_DESCUENTO: 'Público − beneficio', PRECIO_FIJO: 'Precio fijo' };
+const STATUS_LABEL: Record<QuoteStatus, string> = { BORRADOR: 'Borrador', ENVIADO: 'Enviado', ACEPTADO: 'Aceptado', RECHAZADO: 'Rechazado', VENCIDO: 'Vencido' };
 const TYPE_LABEL: Record<ItemType, string> = { EQUIPO: 'Equipo', REPUESTO: 'Repuesto', MATERIAL: 'Material', MANO_DE_OBRA: 'Mano de obra', SERVICIO: 'Servicio' };
 const TYPE_FROM_TEXT: [RegExp, ItemType][] = [
   [/repuesto/, 'REPUESTO'],
@@ -374,6 +376,124 @@ export class ExcelService {
       row.getCell('listPrice').numFmt = r.currency === 'USD' ? '"U$S" #,##0.00' : '"$" #,##0.00';
       row.getCell('percent').numFmt = '0.0%';
       row.getCell('ars').numFmt = '"$" #,##0';
+    }
+    return wb.xlsx.writeBuffer();
+  }
+
+  async exportQuotes(filter: { desde?: string; hasta?: string; status?: QuoteStatus }) {
+    const conds: SQL[] = [];
+    if (filter.desde) conds.push(gte(quotes.createdAt, new Date(`${filter.desde}T00:00:00-03:00`)));
+    if (filter.hasta) conds.push(lte(quotes.createdAt, new Date(`${filter.hasta}T23:59:59-03:00`)));
+    const rows = await this.db
+      .select({ quote: quotes, client: clients, userName: users.name })
+      .from(quotes)
+      .leftJoin(clients, eq(quotes.clientId, clients.id))
+      .leftJoin(users, eq(quotes.userId, users.id))
+      .where(and(...conds))
+      .orderBy(desc(quotes.number));
+    const groups = rows.length
+      ? await this.db.query.quoteGroups.findMany({ where: inArray(quoteGroups.quoteId, rows.map((r) => r.quote.id)), orderBy: asc(quoteGroups.sortOrder), with: { items: true } })
+      : [];
+    const list = rows
+      .map((r) => ({ ...r, status: effectiveStatus(r.quote) }))
+      .filter((r) => !filter.status || r.status === filter.status);
+
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Presupuestador Gesetec';
+    const fecha = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const ws = wb.addWorksheet('Presupuestos');
+    this.styleSheet(ws, `GESETEC CALDERAS · Presupuestos · ${fecha}`, [
+      { header: 'N°', key: 'number', width: 8 },
+      { header: 'Fecha', key: 'date', width: 12 },
+      { header: 'Cliente', key: 'client', width: 28 },
+      { header: 'WhatsApp', key: 'phone', width: 16 },
+      { header: 'Zona', key: 'zone', width: 18 },
+      { header: 'Título', key: 'title', width: 40 },
+      { header: 'Tipo', key: 'mode', width: 13 },
+      { header: 'Estado', key: 'status', width: 12 },
+      { header: 'Total / opciones ($)', key: 'total', width: 20 },
+      { header: 'Dólar usado', key: 'dollar', width: 12 },
+      { header: 'Armó', key: 'user', width: 16 },
+    ]);
+    const det = wb.addWorksheet('Detalle de ítems');
+    this.styleSheet(det, `GESETEC CALDERAS · Ítems de cada presupuesto · ${fecha}`, [
+      { header: 'N°', key: 'number', width: 8 },
+      { header: 'Cliente', key: 'client', width: 26 },
+      { header: 'Opción', key: 'group', width: 14 },
+      { header: 'Código', key: 'code', width: 16 },
+      { header: 'Ítem', key: 'name', width: 46 },
+      { header: 'Tipo', key: 'type', width: 14 },
+      { header: 'Cantidad', key: 'qty', width: 10 },
+      { header: 'Precio unitario ($)', key: 'unit', width: 18 },
+      { header: 'Subtotal ($)', key: 'sub', width: 16 },
+    ]);
+    let suma = 0;
+    for (const r of list) {
+      const gs = groups.filter((g) => g.quoteId === r.quote.id);
+      const totals = gs.map((g) => g.items.reduce((a, i) => a + lineTotal(i), 0));
+      const isSuma = r.quote.mode === 'SUMA';
+      if (isSuma) suma += totals.reduce((a, b) => a + b, 0);
+      const row = ws.addRow({
+        number: numero(r.quote.number),
+        date: r.quote.createdAt,
+        client: r.client?.name ?? '',
+        phone: r.client?.phone ?? '',
+        zone: r.client?.zone ?? '',
+        title: r.quote.title,
+        mode: isSuma ? 'Una opción' : 'Comparativa',
+        status: STATUS_LABEL[r.status],
+        total: isSuma ? totals.reduce((a, b) => a + b, 0) : totals.map((t, i) => `${gs[i].label}: $ ${t.toLocaleString('es-AR')}`).join(' · '),
+        dollar: r.quote.dollarSell == null ? '' : Number(r.quote.dollarSell),
+        user: r.userName ?? '',
+      });
+      row.getCell('date').numFmt = 'dd/mm/yyyy';
+      if (isSuma) row.getCell('total').numFmt = '"$" #,##0';
+      row.getCell('dollar').numFmt = '"$" #,##0.00';
+      for (const g of gs)
+        for (const i of g.items) {
+          const d = det.addRow({ number: numero(r.quote.number), client: r.client?.name ?? '', group: isSuma ? '' : g.label, code: i.code ?? '', name: i.name, type: TYPE_LABEL[i.type], qty: Number(i.qty), unit: i.unitPrice, sub: lineTotal(i) });
+          d.getCell('unit').numFmt = '"$" #,##0';
+          d.getCell('sub').numFmt = '"$" #,##0';
+        }
+    }
+    const tot = ws.addRow({ title: 'Total presupuestos de una opción', total: suma });
+    tot.font = { bold: true };
+    tot.getCell('total').numFmt = '"$" #,##0';
+    return wb.xlsx.writeBuffer();
+  }
+
+  async exportClients() {
+    const rows = await this.db
+      .select({
+        name: clients.name,
+        phone: clients.phone,
+        email: clients.email,
+        zone: clients.zone,
+        address: clients.address,
+        createdAt: clients.createdAt,
+        quoteCount: sql<number>`(select count(*)::int from quotes q where q.client_id = "clients"."id")`,
+        lastQuoteAt: sql<string | null>`(select max(q.created_at) from quotes q where q.client_id = "clients"."id")`,
+      })
+      .from(clients)
+      .orderBy(asc(clients.name));
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Presupuestador Gesetec';
+    const fecha = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const ws = wb.addWorksheet('Clientes');
+    this.styleSheet(ws, `GESETEC CALDERAS · Clientes · ${fecha}`, [
+      { header: 'Nombre', key: 'name', width: 30 },
+      { header: 'WhatsApp', key: 'phone', width: 18 },
+      { header: 'Email', key: 'email', width: 26 },
+      { header: 'Zona', key: 'zone', width: 18 },
+      { header: 'Dirección', key: 'address', width: 30 },
+      { header: 'Presupuestos', key: 'quoteCount', width: 13 },
+      { header: 'Último presupuesto', key: 'last', width: 18 },
+      { header: 'Alta', key: 'createdAt', width: 12 },
+    ]);
+    for (const r of rows) {
+      const row = ws.addRow({ ...r, last: r.lastQuoteAt ? new Date(r.lastQuoteAt) : '' });
+      row.getCell('last').numFmt = 'dd/mm/yyyy';
+      row.getCell('createdAt').numFmt = 'dd/mm/yyyy';
     }
     return wb.xlsx.writeBuffer();
   }

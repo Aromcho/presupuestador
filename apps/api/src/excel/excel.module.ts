@@ -8,7 +8,7 @@ import { CatalogModule } from '../catalog/catalog.module';
 import { AuthUser, CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SessionGuard } from '../common/guards/session.guard';
-import type { ItemType } from '../db/schema';
+import type { ItemType, QuoteStatus } from '../db/schema';
 import { ExcelService } from './excel.service';
 
 const TYPES = ['EQUIPO', 'REPUESTO', 'MATERIAL', 'MANO_DE_OBRA', 'SERVICIO'];
@@ -22,6 +22,12 @@ class ImportDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) nameCol?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) priceCol?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) typeCol?: number;
+}
+
+class ExportQuotesQuery {
+  @IsOptional() @IsString() desde?: string;
+  @IsOptional() @IsString() hasta?: string;
+  @IsOptional() @IsIn(['BORRADOR', 'ENVIADO', 'ACEPTADO', 'RECHAZADO', 'VENCIDO']) status?: QuoteStatus;
 }
 
 class ExportQuery {
@@ -70,6 +76,24 @@ class ExcelController {
     const fecha = new Date().toISOString().slice(0, 10);
     res.setHeader('Content-Type', XLSX);
     res.setHeader('Content-Disposition', `attachment; filename="Gesetec_catalogo_${fecha}.xlsx"`);
+    res.send(Buffer.from(buf));
+  }
+
+  @Get('export/presupuestos.xlsx')
+  async exportQuotes(@Query() q: ExportQuotesQuery, @Res() res: Response) {
+    const buf = await this.excel.exportQuotes(q);
+    const fecha = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="Gesetec_presupuestos_${fecha}.xlsx"`);
+    res.send(Buffer.from(buf));
+  }
+
+  @Get('export/clientes.xlsx')
+  async exportClients(@Res() res: Response) {
+    const buf = await this.excel.exportClients();
+    const fecha = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="Gesetec_clientes_${fecha}.xlsx"`);
     res.send(Buffer.from(buf));
   }
 }

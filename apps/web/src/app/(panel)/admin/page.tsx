@@ -30,6 +30,12 @@ export default function Administracion() {
         <BotonLink href="/api/admin/excel/export/catalogo.xlsx" variante="contorno" icono="excel">
           Exportar catálogo a Excel
         </BotonLink>
+        <BotonLink href="/api/admin/excel/export/presupuestos.xlsx" variante="contorno" icono="excel">
+          Exportar presupuestos
+        </BotonLink>
+        <BotonLink href="/api/admin/excel/export/clientes.xlsx" variante="contorno" icono="excel">
+          Exportar clientes
+        </BotonLink>
         <BotonLink href="/catalogo?aumento=1" variante="contorno" icono="porcentaje">
           Actualizar precios por %
         </BotonLink>

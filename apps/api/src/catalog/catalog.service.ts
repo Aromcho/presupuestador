@@ -131,6 +131,10 @@ export class CatalogService {
   private filters(q: ItemQueryDto): SQL | undefined {
     const conds: (SQL | undefined)[] = [];
     if (q.q) conds.push(...tokens(q.q).map((t) => ilike(items.searchText, `%${t}%`)));
+    if (q.ids) {
+      const ids = q.ids.split(',').map((x) => x.trim()).filter((x) => /^[0-9a-f-]{36}$/i.test(x));
+      conds.push(ids.length ? inArray(items.id, ids) : sql`false`);
+    }
     if (q.type) conds.push(eq(items.type, q.type));
     if (q.brandId) conds.push(eq(items.brandId, q.brandId));
     if (q.priceListId) conds.push(eq(items.priceListId, q.priceListId));
@@ -154,6 +158,13 @@ export class CatalogService {
       this.priceContext(),
     ]);
     return { items: rows.map((r) => this.present(r as Row, ctx, user.role === 'ADMIN')), total, page, limit };
+  }
+
+  /** Precio final en pesos de hoy para varios ítems (para actualizar un presupuesto al dólar del día) */
+  async arsFor(ids: string[]) {
+    if (!ids.length) return new Map<string, { ars: number; currency: Currency }>();
+    const [rows, ctx] = await Promise.all([this.baseQuery().where(inArray(items.id, ids)), this.priceContext()]);
+    return new Map(rows.map((r) => [r.id, { ars: this.present(r as Row, ctx, false).price.ars, currency: r.currency as Currency }]));
   }
 
   async byId(id: string, user: AuthUser) {

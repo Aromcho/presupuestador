@@ -322,7 +322,18 @@ export const templateItemsRelations = relations(templateItems, ({ one }) => ({
 
 export const quotesRelations = relations(quotes, ({ one, many }) => ({
   client: one(clients, { fields: [quotes.clientId], references: [clients.id] }),
+  user: one(users, { fields: [quotes.userId], references: [users.id] }),
+  template: one(templates, { fields: [quotes.templateId], references: [templates.id] }),
   groups: many(quoteGroups),
+  shareLinks: many(shareLinks),
+}));
+
+export const clientsRelations = relations(clients, ({ many }) => ({
+  quotes: many(quotes),
+}));
+
+export const shareLinksRelations = relations(shareLinks, ({ one }) => ({
+  quote: one(quotes, { fields: [shareLinks.quoteId], references: [quotes.id] }),
 }));
 
 export const quoteGroupsRelations = relations(quoteGroups, ({ one, many }) => ({

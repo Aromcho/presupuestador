@@ -12,4 +12,4 @@ export function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ['/((?!api|uploads|_next|brand|favicon.ico).*)'] };
+export const config = { matcher: ['/((?!api|uploads|_next|brand|favicon.ico|p/).*)'] };
