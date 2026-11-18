@@ -15,6 +15,13 @@
       "when": 1794958479811,
       "tag": "0001_excluir_codigos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794960265984,
+      "tag": "0002_nota_servicio",
+      "breakpoints": true
     }
   ]
 }

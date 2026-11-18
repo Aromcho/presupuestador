@@ -207,7 +207,7 @@ export class PdfService {
       const sub: string[] = [];
       if (i.qty !== 1) sub.push(`${cantidad(i.qty)} × ${pesos(i.unitPrice)}`);
       if (i.discountPct) sub.push(`− ${cantidad(i.discountPct)}%`);
-      if (!PRODUCT_TYPES.includes(i.type)) sub.push('+ IVA si requiere factura');
+      if (!PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded) sub.push('+ IVA si requiere factura');
       const rowH = Math.max(foto ? 52 : 0, hName + hMeta, sub.length ? 26 : 14) + 14;
       asegurar(rowH);
       const top = y + 7;
@@ -251,8 +251,8 @@ export class PdfService {
       y += 14;
       doc.roundedRect(M, y, CW, 58, 14).fill(C.marino);
       etiqueta('Total', M + 18, y + 15, C.celeste);
-      const hayProductos = q.groups.some((g) => g.items.some((i) => PRODUCT_TYPES.includes(i.type)));
-      const hayMO = q.groups.some((g) => g.items.some((i) => !PRODUCT_TYPES.includes(i.type)));
+      const hayProductos = q.groups.some((g) => g.items.some((i) => PRODUCT_TYPES.includes(i.type) || i.ivaIncluded));
+      const hayMO = q.groups.some((g) => g.items.some((i) => !PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded));
       font('r', 9, C.celeste).text(hayProductos ? (hayMO ? 'Equipos con IVA incluido · mano de obra sin IVA' : 'Precio final, IVA incluido') : 'Si requiere factura, se suma el IVA', M + 18, y + 30, { width: CW / 2, lineBreak: false });
       font('x', 24, '#ffffff').text(pesos(total), M + CW / 2 - 18, y + 16, { width: CW / 2, align: 'right', lineBreak: false });
       y += 58;

@@ -24,7 +24,7 @@ export const itemTypeEnum = pgEnum('item_type', ['EQUIPO', 'REPUESTO', 'MATERIAL
 export const currencyEnum = pgEnum('currency', ['ARS', 'USD']);
 /** COSTO_MAS_MARGEN: lista de costo + ganancia · LISTA_MENOS_DESCUENTO: lista al público − beneficio · PRECIO_FIJO: tal cual */
 export const priceRuleEnum = pgEnum('price_rule', ['COSTO_MAS_MARGEN', 'LISTA_MENOS_DESCUENTO', 'PRECIO_FIJO']);
-export const noteRuleEnum = pgEnum('note_rule', ['SIEMPRE', 'SI_PRODUCTOS', 'SI_MANO_DE_OBRA', 'SI_SIN_INSTALACION', 'MANUAL']);
+export const noteRuleEnum = pgEnum('note_rule', ['SIEMPRE', 'SI_PRODUCTOS', 'SI_MANO_DE_OBRA', 'SI_SIN_INSTALACION', 'SI_SERVICIO', 'MANUAL']);
 export const quoteModeEnum = pgEnum('quote_mode', ['SUMA', 'COMPARATIVA']);
 export const quoteStatusEnum = pgEnum('quote_status', ['BORRADOR', 'ENVIADO', 'ACEPTADO', 'RECHAZADO', 'VENCIDO']);
 

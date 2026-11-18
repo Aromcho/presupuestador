@@ -31,7 +31,7 @@ class TemplateDto {
 
 class NoteDto {
   @IsString() @MinLength(3) @MaxLength(240) text: string;
-  @IsIn(['SIEMPRE', 'SI_PRODUCTOS', 'SI_MANO_DE_OBRA', 'SI_SIN_INSTALACION', 'MANUAL']) rule: NoteRule;
+  @IsIn(['SIEMPRE', 'SI_PRODUCTOS', 'SI_MANO_DE_OBRA', 'SI_SIN_INSTALACION', 'SI_SERVICIO', 'MANUAL']) rule: NoteRule;
   @IsOptional() @IsInt() sortOrder?: number;
   @IsOptional() @IsBoolean() active?: boolean;
 }

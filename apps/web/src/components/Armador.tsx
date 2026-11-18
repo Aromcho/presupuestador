@@ -77,7 +77,7 @@ export const lineaDe = (it: Item, qty = 1): Linea => ({
   unitPrice: it.price.ars,
   qty,
   discountPct: 0,
-  ivaIncluded: esProducto(it.type),
+  ivaIncluded: it.price.withIva,
   usd: it.currency === 'USD',
 });
 
@@ -112,15 +112,20 @@ function notaAplica(n: Note, b: Borrador) {
   const lineas = b.groups.flatMap((g) => g.items);
   const productos = lineas.some((l) => esProducto(l.type));
   const manoDeObra = lineas.some((l) => !esProducto(l.type));
+  // Precio final con IVA: productos y servicios de tarifario (ej.: servicio técnico)
+  const conIva = lineas.some((l) => esProducto(l.type) || l.ivaIncluded);
+  const sinIva = lineas.some((l) => !esProducto(l.type) && !l.ivaIncluded);
   switch (n.rule) {
     case 'SIEMPRE':
       return true;
     case 'SI_PRODUCTOS':
-      return productos;
+      return conIva;
     case 'SI_MANO_DE_OBRA':
-      return manoDeObra;
+      return sinIva;
     case 'SI_SIN_INSTALACION':
       return productos && !manoDeObra;
+    case 'SI_SERVICIO':
+      return lineas.some((l) => l.type === 'SERVICIO');
     default:
       return false;
   }
@@ -753,7 +758,7 @@ function FilaLinea({ l, cambiar, quitar }: { l: Linea; cambiar: (c: Partial<Line
             <span>{TIPOS[l.type]}</span>
             {l.code && <span>· {l.code}</span>}
             {l.usd && <Pastilla tono="azul">U$S al dólar de hoy</Pastilla>}
-            {!esProducto(l.type) && <span>· sin IVA (+ IVA si factura)</span>}
+            {!esProducto(l.type) && <span>{l.ivaIncluded ? '· precio final con IVA' : '· sin IVA (+ IVA si factura)'}</span>}
           </p>
         </div>
         <IconoBoton icono="basura" etiqueta="Quitar" onClick={quitar} className="sm:hidden" />

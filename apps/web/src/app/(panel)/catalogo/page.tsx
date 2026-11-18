@@ -286,7 +286,7 @@ function EditarItem({ item, marcas, listas, onCerrar }: { item: Item | null; mar
         </div>
         <Campo etiqueta={`Precio de lista (${f.currency === 'USD' ? 'U$S' : '$'})`} inputMode="decimal" value={f.listPrice} onChange={(e) => set('listPrice', e.target.value)} />
         <Campo etiqueta="Unidad" value={f.unit} onChange={(e) => set('unit', e.target.value)} />
-        <Interruptor activo={f.ivaIncluded} onCambio={(v) => set('ivaIncluded', v)} etiqueta="El precio de lista ya trae IVA" ayuda="Equipos y repuestos salen con IVA incluido; la mano de obra, sin IVA." />
+        <Interruptor activo={f.ivaIncluded} onCambio={(v) => set('ivaIncluded', v)} etiqueta="El precio de lista ya trae IVA" ayuda="Equipos y repuestos salen con IVA incluido. La mano de obra y los servicios salen sin IVA, salvo que el precio ya lo traiga (ej.: tarifario de servicio técnico)." />
         <div className="rounded-2xl border border-linea bg-noche p-4 sm:col-span-2">
           <p className="text-sm text-celeste">
             Regla de la lista: <b className="text-white">{lista ? `${REGLAS[lista.rule].titulo}${lista.rule !== 'PRECIO_FIJO' ? ` (${lista.percent}%)` : ''}` : 'Precio fijo'}</b>. Si este ítem lleva otra, completala acá:

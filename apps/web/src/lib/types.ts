@@ -2,7 +2,7 @@ export type Role = 'ADMIN' | 'VENTAS';
 export type ItemType = 'EQUIPO' | 'REPUESTO' | 'MATERIAL' | 'MANO_DE_OBRA' | 'SERVICIO';
 export type Currency = 'ARS' | 'USD';
 export type PriceRule = 'COSTO_MAS_MARGEN' | 'LISTA_MENOS_DESCUENTO' | 'PRECIO_FIJO';
-export type NoteRule = 'SIEMPRE' | 'SI_PRODUCTOS' | 'SI_MANO_DE_OBRA' | 'SI_SIN_INSTALACION' | 'MANUAL';
+export type NoteRule = 'SIEMPRE' | 'SI_PRODUCTOS' | 'SI_MANO_DE_OBRA' | 'SI_SIN_INSTALACION' | 'SI_SERVICIO' | 'MANUAL';
 
 export interface User {
   id: string;

@@ -145,7 +145,7 @@ function Ficha() {
                         <p className="text-xs text-humo">
                           {i.qty !== 1 ? `${i.qty} × ${pesos(i.unitPrice)}` : ''}
                           {i.qty !== 1 && !esProducto(i.type) ? ' · ' : ''}
-                          {!esProducto(i.type) ? '+ IVA si factura' : ''}
+                          {!esProducto(i.type) && !i.ivaIncluded ? '+ IVA si factura' : ''}
                         </p>
                       )}
                     </div>

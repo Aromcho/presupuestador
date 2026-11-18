@@ -30,8 +30,9 @@ export const REGLAS: Record<PriceRule, { titulo: string; ayuda: string; pct: str
 export const NOTA_REGLAS: Record<NoteRule, string> = {
   SIEMPRE: 'Siempre',
   SI_PRODUCTOS: 'Si hay equipos o repuestos',
-  SI_MANO_DE_OBRA: 'Si hay mano de obra o servicios',
+  SI_MANO_DE_OBRA: 'Si hay mano de obra o servicios sin IVA',
   SI_SIN_INSTALACION: 'Si no se suma instalación',
+  SI_SERVICIO: 'Si hay servicio técnico',
   MANUAL: 'Solo si la agrego a mano',
 };
 

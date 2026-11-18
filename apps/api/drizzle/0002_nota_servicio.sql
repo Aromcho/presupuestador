@@ -1,0 +1,1 @@
+ALTER TYPE "public"."note_rule" ADD VALUE 'SI_SERVICIO' BEFORE 'MANUAL';
