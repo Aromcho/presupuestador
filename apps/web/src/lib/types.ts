@@ -82,6 +82,7 @@ export interface Template {
   icon: string;
   mode: 'SUMA' | 'COMPARATIVA';
   seIncluye: string[];
+  notes: string[];
   sortOrder: number;
   active: boolean;
   items: { id: string; qty: number; item: { id: string; name: string; code: string | null; type: ItemType } }[];

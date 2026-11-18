@@ -11,7 +11,7 @@ import { slugify } from '../common/utils/text';
 import { Database, InjectDb } from '../db/db.module';
 import { NoteRule, notes, QuoteMode, templateItems, templates } from '../db/schema';
 
-const ICONS = ['instalacion', 'caldera_pie', 'piscina', 'radiador', 'mantenimiento', 'temporada', 'columnas', 'llave'];
+const ICONS = ['instalacion', 'caldera_pie', 'piscina', 'radiador', 'mantenimiento', 'temporada', 'columnas', 'llave', 'llama'];
 
 class TemplateItemDto {
   @IsUUID() itemId: string;
@@ -24,6 +24,7 @@ class TemplateDto {
   @IsOptional() @IsIn(ICONS) icon?: string;
   @IsOptional() @IsIn(['SUMA', 'COMPARATIVA']) mode?: QuoteMode;
   @IsOptional() @IsArray() @ArrayMaxSize(20) @IsString({ each: true }) @MaxLength(120, { each: true }) seIncluye?: string[];
+  @IsOptional() @IsArray() @ArrayMaxSize(10) @IsString({ each: true }) @MaxLength(240, { each: true }) notes?: string[];
   @IsOptional() @IsArray() @ArrayMaxSize(40) @ValidateNested({ each: true }) @Type(() => TemplateItemDto) items?: TemplateItemDto[];
   @IsOptional() @IsInt() sortOrder?: number;
   @IsOptional() @IsBoolean() active?: boolean;

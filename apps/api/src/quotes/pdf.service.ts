@@ -31,11 +31,10 @@ const BOTTOM = H - 66;
 const FONTS = { r: '400', s: '600', b: '700', x: '800' } as const;
 type Font = keyof typeof FONTS;
 
-// Íconos de trazo (24×24) para la franja de contacto
-const ICONOS = {
-  chat: 'M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z',
-  camara: 'M4.5 7.5h3l1.6-2.5h5.8l1.6 2.5h3a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5zM12 16.6a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8z',
-  globo: 'M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5z',
+/** Íconos de la franja de contacto: WhatsApp e Instagram con su logo, y la web con el favicon de gesetecalderas.com */
+const red = (n: string) => {
+  const file = resolve(__dirname, '../../assets/redes', `${n}.png`);
+  return existsSync(file) ? readFileSync(file) : null;
 };
 
 const pesos = (n: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -60,15 +59,19 @@ export class PdfService {
     return resolve(this.config.get<string>('UPLOADS_DIR') ?? './uploads');
   }
 
-  /** Logos blancos de las marcas (los mismos de gesetecalderas.com), en el orden de Empresa → marcas */
+  /**
+   * Logos oficiales de las marcas en sus colores (los mismos de gesetecalderas.com), en el orden de Empresa → marcas.
+   * PEISA va en blanco sobre su rojo, como en la web.
+   */
   private marcas(nombres: string[]) {
-    const out: { buf: Buffer; ratio: number }[] = [];
+    const out: { buf: Buffer; ratio: number; fondo?: string }[] = [];
     for (const n of nombres) {
-      const file = resolve(__dirname, '../../assets/marcas', `${slugify(n)}.png`);
+      const slug = slugify(n);
+      const file = resolve(__dirname, '../../assets/marcas', `${slug}.png`);
       if (!existsSync(file)) continue;
       const buf = readFileSync(file);
       // ancho/alto desde el encabezado PNG
-      out.push({ buf, ratio: buf.readUInt32BE(16) / buf.readUInt32BE(20) });
+      out.push({ buf, ratio: buf.readUInt32BE(16) / buf.readUInt32BE(20), fondo: slug === 'peisa' ? '#E10600' : undefined });
     }
     return out;
   }
@@ -323,19 +326,24 @@ export class PdfService {
     const by = Math.max(y + 4, limite - bandH);
     doc.roundedRect(M, by, CW, bandH, 14).fill(C.marino);
     const contactos = [
-      { icono: ICONOS.chat, color: '#25D366', etiqueta: 'WhatsApp', valor: empresa.telefono, url: empresa.whatsapp ? `https://wa.me/${empresa.whatsapp.replace(/\D/g, '')}` : '' },
-      { icono: ICONOS.camara, color: C.rojo, etiqueta: 'Instagram', valor: empresa.instagram ? `@${empresa.instagram.replace(/^@/, '')}` : '', url: empresa.instagram ? `https://instagram.com/${empresa.instagram.replace(/^@/, '')}` : '' },
-      { icono: ICONOS.globo, color: C.azul, etiqueta: 'Web', valor: empresa.web, url: empresa.web ? `https://${empresa.web.replace(/^https?:\/\//, '')}` : '' },
+      { icono: red('whatsapp'), redondo: false, etiqueta: 'WhatsApp', valor: empresa.telefono, url: empresa.whatsapp ? `https://wa.me/${empresa.whatsapp.replace(/\D/g, '')}` : '' },
+      { icono: red('instagram'), redondo: false, etiqueta: 'Instagram', valor: empresa.instagram ? `@${empresa.instagram.replace(/^@/, '')}` : '', url: empresa.instagram ? `https://instagram.com/${empresa.instagram.replace(/^@/, '')}` : '' },
+      { icono: red('web'), redondo: true, etiqueta: 'Web', valor: empresa.web, url: empresa.web ? `https://${empresa.web.replace(/^https?:\/\//, '')}` : '' },
     ].filter((x) => x.valor);
     const colW = (CW - 36) / Math.max(contactos.length, 1);
     contactos.forEach((k, i) => {
       const x = M + 18 + i * colW;
       const cy = by + 15;
-      doc.circle(x + 15, cy + 15, 15).fill(k.color);
-      doc.save();
-      doc.translate(x + 15 - 9, cy + 15 - 9).scale(18 / 24);
-      doc.path(k.icono).lineWidth(2).lineCap('round').lineJoin('round').stroke('#ffffff');
-      doc.restore();
+      if (k.icono) {
+        if (k.redondo) {
+          // favicon: recortado en círculo, con un filo celeste para que se despegue del azul
+          doc.save();
+          doc.circle(x + 15, cy + 15, 15).clip();
+          doc.image(k.icono, x, cy, { width: 30, height: 30 });
+          doc.restore();
+          doc.circle(x + 15, cy + 15, 15).lineWidth(0.8).strokeColor('#2A3D6B').stroke();
+        } else doc.image(k.icono, x, cy, { width: 30, height: 30 });
+      }
       etiqueta(k.etiqueta, x + 38, cy + 3, C.celeste);
       const ancho = colW - 42;
       let size = 12;
@@ -347,14 +355,25 @@ export class PdfService {
       const ly = by + 55;
       doc.moveTo(M + 18, ly).lineTo(W - M - 18, ly).lineWidth(0.6).strokeColor('#1C2C52').stroke();
       etiqueta('Marcas con las que trabajamos', M + 18, ly + 10, C.celeste);
-      const gap = 18;
+      // Cada logo con más o menos la misma superficie, así los anchos (Euterma, Tameco) no achican a los demás
+      const gap = 14;
+      const pad = 5; // margen del fondo rojo de PEISA
       const inner = CW - 36;
-      const h = Math.min(18, (inner - gap * (logos.length - 1)) / logos.reduce((a, l) => a + l.ratio, 0));
-      const total = logos.reduce((a, l) => a + l.ratio * h, 0) + gap * (logos.length - 1);
+      const libre = inner - gap * (logos.length - 1) - logos.filter((l) => l.fondo).length * pad * 2;
+      const k = libre / logos.reduce((a, l) => a + Math.sqrt(l.ratio), 0);
+      const alto = (l: { ratio: number }) => Math.min(17, k / Math.sqrt(l.ratio));
+      const total = logos.reduce((a, l) => a + l.ratio * alto(l) + (l.fondo ? pad * 2 : 0), 0) + gap * (logos.length - 1);
       let lx = M + 18 + (inner - total) / 2;
+      const cy = ly + 34; // centro de la fila
       for (const l of logos) {
-        doc.image(l.buf, lx, ly + 25 + (18 - h) / 2, { height: h });
-        lx += l.ratio * h + gap;
+        const h = alto(l);
+        const w = l.ratio * h;
+        if (l.fondo) {
+          doc.roundedRect(lx, cy - h / 2 - pad + 1, w + pad * 2, h + pad * 2 - 2, 4).fill(l.fondo);
+          lx += pad;
+        }
+        doc.image(l.buf, lx, cy - h / 2, { height: h });
+        lx += w + gap + (l.fondo ? pad : 0);
       }
     }
 

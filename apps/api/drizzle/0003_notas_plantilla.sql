@@ -1,0 +1,1 @@
+ALTER TABLE "templates" ADD COLUMN "notes" text[] DEFAULT '{}'::text[] NOT NULL;

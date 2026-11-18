@@ -235,7 +235,7 @@ export function Armador({ editar, plantillaInicial, clienteInicial }: { editar?:
           : t.mode === 'COMPARATIVA'
             ? lineas.map((l, i) => ({ key: uid(), label: letra(i), items: [l] }))
             : [{ key: uid(), label: 'Presupuesto', items: lineas }];
-      return { ...prev, templateId: t.id, title: t.title, mode: t.mode, seIncluye: [...t.seIncluye], groups };
+      return { ...prev, templateId: t.id, title: t.title, mode: t.mode, seIncluye: [...t.seIncluye], extraNotes: [...(t.notes ?? [])], groups };
     });
     setGrupoActivo(0);
     if (tieneItems && t.items.length) toast('Cambié la plantilla. Los equipos que ya cargaste quedaron igual.');
@@ -742,7 +742,8 @@ function FilaLinea({ l, cambiar, quitar }: { l: Linea; cambiar: (c: Partial<Line
           </span>
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          {l.itemId ? (
+          {/* Equipos y repuestos del catálogo quedan con su nombre; mano de obra y servicios se pueden ajustar (ej.: "de calefón Rinnai") */}
+          {l.itemId && esProducto(l.type) ? (
             <p className="font-semibold leading-snug">{l.name}</p>
           ) : (
             <input

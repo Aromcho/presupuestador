@@ -185,6 +185,8 @@ export const templates = pgTable('templates', {
   icon: text('icon').notNull().default('instalacion'),
   mode: quoteModeEnum('mode').notNull().default('SUMA'),
   seIncluye: textArray('se_incluye'),
+  /** Aclaraciones propias de la plantilla (ej.: "Los inyectores los provee el cliente"); se suman al presupuesto */
+  notes: textArray('notes'),
   sortOrder: integer('sort_order').notNull().default(0),
   active: boolean('active').notNull().default(true),
   createdAt: createdAt(),

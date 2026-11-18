@@ -16,6 +16,7 @@ const ICONOS: { id: IconoNombre; t: string }[] = [
   { id: 'temporada', t: 'Temporada' },
   { id: 'columnas', t: 'Comparativa' },
   { id: 'llave', t: 'Reparación' },
+  { id: 'llama', t: 'Gas' },
 ];
 
 export default function Plantillas() {
@@ -52,6 +53,7 @@ export default function Plantillas() {
                 </span>
               </span>
               {t.seIncluye.length > 0 ? <span className="text-sm text-celeste">Incluye: {t.seIncluye.join(' · ')}</span> : <span className="text-sm text-humo">Sin «Se incluye» cargado</span>}
+              {t.notes?.length > 0 && <span className="text-sm text-humo">Aclaraciones: {t.notes.join(' · ')}</span>}
             </button>
           ))}
         </div>
@@ -126,10 +128,12 @@ function EditarPlantilla({ plantilla, onCerrar }: { plantilla: Template | null; 
     icon: (plantilla?.icon ?? 'instalacion') as IconoNombre,
     mode: plantilla?.mode ?? ('SUMA' as const),
     seIncluye: plantilla?.seIncluye ?? [],
+    notes: plantilla?.notes ?? [],
     active: plantilla?.active ?? true,
     items: plantilla?.items.map((i) => ({ itemId: i.item.id, name: i.item.name, qty: i.qty })) ?? [],
   });
   const [nuevoIncluye, setNuevoIncluye] = useState('');
+  const [nuevaNota, setNuevaNota] = useState('');
   const [busca, setBusca] = useState('');
   const resultados = useApi<Paged<Item>>(['items', 'plantilla', busca], `/items?limit=6&q=${encodeURIComponent(busca)}`, { enabled: busca.length >= 2 });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }));
@@ -137,7 +141,7 @@ function EditarPlantilla({ plantilla, onCerrar }: { plantilla: Template | null; 
   const guardar = useAccion<void>({
     method: plantilla ? 'PATCH' : 'POST',
     path: plantilla ? `/admin/templates/${plantilla.id}` : '/admin/templates',
-    body: () => ({ name: f.name, title: f.title || f.name, icon: f.icon, mode: f.mode, seIncluye: f.seIncluye, active: f.active, items: f.items.map((i) => ({ itemId: i.itemId, qty: i.qty })) }),
+    body: () => ({ name: f.name, title: f.title || f.name, icon: f.icon, mode: f.mode, seIncluye: f.seIncluye, notes: f.notes, active: f.active, items: f.items.map((i) => ({ itemId: i.itemId, qty: i.qty })) }),
     invalidate: [['templates']],
     success: 'Plantilla guardada',
     onSuccess: onCerrar,
@@ -206,6 +210,32 @@ function EditarPlantilla({ plantilla, onCerrar }: { plantilla: Template | null; 
               onClick={() => {
                 set('seIncluye', [...f.seIncluye, nuevoIncluye.trim()]);
                 setNuevoIncluye('');
+              }}
+            >
+              Sumar
+            </Boton>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <span className="etiqueta text-humo">Aclaraciones de esta plantilla</span>
+          <span className="text-sm text-humo">Se suman a las aclaraciones del presupuesto cuando se usa esta plantilla.</span>
+          {f.notes.map((s) => (
+            <span key={s} className="flex min-h-11 items-center gap-2 rounded-xl border border-linea bg-marino/60 pl-3.5 pr-1 text-sm">
+              <span className="flex-1">{s}</span>
+              <IconoBoton icono="cerrar" etiqueta={`Quitar ${s}`} className="size-9" onClick={() => set('notes', f.notes.filter((x) => x !== s))} />
+            </span>
+          ))}
+          <div className="flex gap-2">
+            <Campo etiqueta="Agregar" value={nuevaNota} onChange={(e) => setNuevaNota(e.target.value)} placeholder="Los inyectores los provee el cliente." className="flex-1" />
+            <Boton
+              variante="suave"
+              icono="mas"
+              className="self-end"
+              disabled={nuevaNota.trim().length < 3}
+              onClick={() => {
+                set('notes', [...f.notes, nuevaNota.trim()]);
+                setNuevaNota('');
               }}
             >
               Sumar

@@ -22,6 +22,13 @@
       "when": 1794960265984,
       "tag": "0002_nota_servicio",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795010551287,
+      "tag": "0003_notas_plantilla",
+      "breakpoints": true
     }
   ]
 }
