@@ -52,6 +52,15 @@ Otros comandos: `npm run build` (compila API y panel), `npm run start` (corre lo
 - Plantillas (caldera mural, comparativa, caldera de pie, climatizador de piscina, piso radiante, service y puesta en marcha) con lo que incluye cada venta, y notas con regla (IVA, instalación aparte, validez de 48 hs, forma de pago).
 - Administración con la grilla de módulos (`apps/web/src/lib/modulos.ts`), los "Próximamente", usuarios, datos de la empresa y el registro de actividad.
 
+## Marketing y redes
+
+*Administración → Marketing y redes* (solo administradores) muestra el plan de redes y publicidad: el calendario de publicaciones con sus ganchos, guiones, recursos y texto del post; el plan; los pendientes; el inventario de fotos y videos de los álbumes; las series, el hilo y la rutina.
+
+- **Cargar o actualizar el plan:** *Importar Excel del plan* con el .xlsx que tiene las hojas Calendario, Plan, Series, Hilo, Rutina, Recursos y Pendientes (solo Calendario es obligatoria). El contenido no va en el repo, que es público: vive en la base.
+- **Estado de cada publicación** (idea, para producir, en edición, programado, publicado) y **nota**: se cambian en el panel. Al volver a importar se actualiza el contenido, pero el estado que se cambió en el panel no se pisa. Lo mismo con los pendientes (resuelto y respuesta).
+- **Exportar a Excel:** calendario y pendientes con el estado y las notas del panel.
+- Recursos: cada archivo tiene su ID (por ejemplo `A06-012`) y la ruta en la compu de Arom; el ícono copia la ruta.
+
 ## Lo que sigue
 
 - **Entrega 2**: armado del presupuesto en 3 pasos (cliente → equipos y trabajos → revisar y enviar), comparativas, vista previa en vivo, PDF con la marca y envío por WhatsApp. Las tablas ya están en la base (`quotes`, `quote_groups`, `quote_items`, `share_links`).

@@ -12,6 +12,7 @@ import { DbModule } from './db/db.module';
 import { ExcelModule } from './excel/excel.module';
 import { ExchangeModule } from './exchange/exchange.module';
 import { HealthController } from './health.controller';
+import { MarketingModule } from './marketing/marketing.module';
 import { MediaModule } from './media/media.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { TemplatesModule } from './templates/templates.module';
@@ -33,6 +34,7 @@ import { UsersModule } from './users/users.module';
     TemplatesModule,
     ClientsModule,
     QuotesModule,
+    MarketingModule,
   ],
   controllers: [HealthController],
   providers: [

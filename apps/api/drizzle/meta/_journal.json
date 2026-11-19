@@ -36,6 +36,13 @@
       "when": 1795091770192,
       "tag": "0004_plantilla_repuestos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795109834322,
+      "tag": "0005_marketing",
+      "breakpoints": true
     }
   ]
 }

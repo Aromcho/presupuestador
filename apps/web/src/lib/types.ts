@@ -224,3 +224,98 @@ export interface SendResult {
   phone: string;
   whatsappUrl: string;
 }
+
+// ---------------------------------------------------------------- marketing y redes
+export type EstadoPieza = 'idea' | 'para producir' | 'en edición' | 'programado' | 'publicado';
+export type EstadoPendiente = 'Abierto' | 'Resuelto';
+
+/** Una publicación del calendario (las claves salen de las columnas del Excel del plan) */
+export interface Pieza {
+  id: string;
+  code: string;
+  date: string;
+  status: EstadoPieza;
+  note: string;
+  day?: string;
+  time?: string;
+  format?: string;
+  series?: string;
+  chapter?: string;
+  arc?: string;
+  goal?: string;
+  formula?: string;
+  hookVoice?: string;
+  hookScreen?: string;
+  score?: string;
+  optionB?: string;
+  optionC?: string;
+  script?: string;
+  echo?: string;
+  resources?: string;
+  toProduce?: string;
+  product?: string;
+  zone?: string;
+  cta?: string;
+  caption?: string;
+  ai?: string;
+  base?: string;
+  recycle?: string;
+  prev?: string;
+  next?: string;
+}
+
+export interface PendienteMkt {
+  id: string;
+  status: EstadoPendiente;
+  answer: string;
+  kind?: string;
+  topic?: string;
+  detail?: string;
+  affects?: string;
+  owner?: string;
+}
+
+export interface TablaMkt {
+  headers: string[];
+  rows: string[][];
+}
+
+export interface MarketingData {
+  importedAt: string | null;
+  importedBy: string | null;
+  fileName: string | null;
+  plan: { titulo: string; md: string }[];
+  series: TablaMkt | null;
+  hilo: TablaMkt | null;
+  rutina: TablaMkt | null;
+  resourcesCount: number;
+  posts: Pieza[];
+  pending: PendienteMkt[];
+}
+
+export interface RecursoMkt {
+  code: string;
+  album?: string;
+  file?: string;
+  path?: string;
+  type?: string;
+  category?: string;
+  desc?: string;
+  brand?: string;
+  model?: string;
+  zone?: string;
+  orientation?: string;
+  duration?: string;
+  resolution?: string;
+  quality?: string;
+  people?: string;
+  plate?: string;
+  facade?: string;
+  usable?: string;
+  condition?: string;
+  value?: string;
+  alsoIn?: string;
+  edited?: string;
+  fileDate?: string;
+  usedIn?: string;
+}

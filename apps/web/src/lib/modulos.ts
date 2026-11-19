@@ -22,6 +22,7 @@ export const MODULOS: Modulo[] = [
   { id: 'plantillas', nombre: 'Plantillas y notas', descripcion: 'Lo que incluye cada venta y las aclaraciones que se agregan solas.', icono: 'plantilla', ruta: '/admin/plantillas', estado: 'activo', rol: 'ADMIN' },
   { id: 'empresa', nombre: 'Empresa y dólar', descripcion: 'Datos del encabezado, numeración, validez, redondeo y dólar BNA.', icono: 'empresa', ruta: '/admin/empresa', estado: 'activo', rol: 'ADMIN' },
   { id: 'usuarios', nombre: 'Usuarios y permisos', descripcion: 'Administrador ve costos y márgenes; ventas arma y manda.', icono: 'usuario', ruta: '/admin/usuarios', estado: 'activo', rol: 'ADMIN' },
+  { id: 'marketing', nombre: 'Marketing y redes', descripcion: 'Plan, calendario de publicaciones con ganchos y guiones, recursos de los álbumes y pendientes.', icono: 'megafono', ruta: '/admin/marketing', estado: 'activo', rol: 'ADMIN' },
   { id: 'actividad', nombre: 'Registro de actividad', descripcion: 'Quién cambió un precio, importó una lista o tocó el dólar.', icono: 'historial', ruta: '/admin/actividad', estado: 'activo', rol: 'ADMIN' },
   // Próximamente
   { id: 'service-anual', nombre: 'Recordatorio de service anual', descripcion: 'A los 11 meses le escribe al cliente por WhatsApp para agendar el service.', icono: 'campana', estado: 'proximamente', rol: 'ADMIN' },

@@ -35,6 +35,7 @@ const trazos = {
   llave: (<><path d="M14.7 6.3a4 4 0 0 0 5 5L21 12.6 12.6 21a2.1 2.1 0 0 1-3-3l8.4-8.4-1.3-1.3M14.7 6.3 17 4a5 5 0 0 0-6.8 6.6L3.6 17.2a2.1 2.1 0 0 0 3 3l6.6-6.6"/></>),
   mail: (<><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></>),
   mantenimiento: (<><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4m8-4v4M8.5 14.5l2.2 2.2 4.8-4.7"/></>),
+  megafono: (<><path d="M3.5 10v4h3.5l8.5 4.5v-13L7 10z"/><path d="M18.5 9a4 4 0 0 1 0 6M7.5 14.5 9 20h2.5l-1-5"/></>),
   mas: (<><path d="M12 5v14M5 12h14"/></>),
   menu: (<><path d="M4 7h16M4 12h16M4 17h10"/></>),
   notas: (<><path d="M5 4h14v16H5z"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></>),

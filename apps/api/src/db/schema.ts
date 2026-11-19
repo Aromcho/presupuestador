@@ -287,6 +287,45 @@ export const shareLinks = pgTable('share_links', {
 });
 
 // ---------------------------------------------------------------- actividad
+// ---------------------------------------------------------------- marketing (plan de redes y publicidad)
+/** Calendario de publicaciones. Las columnas del Excel van en `data`; estado y nota se manejan desde el panel. */
+export const marketingPosts = pgTable(
+  'marketing_posts',
+  {
+    id: id(),
+    code: text('code').notNull().unique(),
+    date: text('date').notNull(),
+    status: text('status').notNull().default('idea'),
+    /** true = el estado se cambió en el panel y una nueva importación no lo pisa */
+    statusFromPanel: boolean('status_from_panel').notNull().default(false),
+    note: text('note'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    data: jsonb('data').$type<Record<string, string>>().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('marketing_posts_date_idx').on(t.date)],
+);
+
+/** Inventario de fotos y videos (álbumes de Leo) */
+export const marketingResources = pgTable('marketing_resources', {
+  code: text('code').primaryKey(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  data: jsonb('data').$type<Record<string, string>>().notNull(),
+});
+
+/** Pendientes del plan: supuestos, datos a confirmar con Leo, tomas a grabar */
+export const marketingPending = pgTable('marketing_pending', {
+  id: id(),
+  key: text('key').notNull().unique(),
+  status: text('status').notNull().default('Abierto'),
+  answer: text('answer'),
+  fromPanel: boolean('from_panel').notNull().default(false),
+  sortOrder: integer('sort_order').notNull().default(0),
+  data: jsonb('data').$type<Record<string, string>>().notNull(),
+  updatedAt: updatedAt(),
+});
+
 export const activity = pgTable(
   'activity',
   {
