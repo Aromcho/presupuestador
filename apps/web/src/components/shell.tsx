@@ -17,6 +17,7 @@ const NAV: Nav[] = [
   { href: '/presupuestos', texto: 'Presupuestos', icono: 'doc' },
   { href: '/clientes', texto: 'Clientes', icono: 'clientes' },
   { href: '/catalogo', texto: 'Catálogo', icono: 'etiqueta' },
+  { href: '/marketing', texto: 'Marketing', icono: 'megafono', admin: true },
   { href: '/admin', texto: 'Administración', icono: 'ajustes', admin: true },
 ];
 
@@ -139,10 +140,10 @@ export function Shell({ children }: { children: ReactNode }) {
             <Icono nombre="mas" className="size-7" />
           </span>
         </Link>
-        {(admin ? [NAV[3], NAV[4]] : [NAV[3], NAV[2]]).map((n) => (
+        {(admin ? ['/marketing', '/admin'] : ['/catalogo', '/clientes']).map((h) => NAV.find((n) => n.href === h)!).map((n) => (
           <Link key={n.href} href={n.href} className={cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[0.7rem]', activo(pathname, n.href) ? 'font-bold text-white' : 'text-humo')}>
             <Icono nombre={n.icono} className="size-[1.4rem]" />
-            {n.admin ? 'Admin' : n.texto}
+            {n.href === '/admin' ? 'Admin' : n.texto}
           </Link>
         ))}
       </nav>
