@@ -29,6 +29,13 @@
       "when": 1795010551287,
       "tag": "0003_notas_plantilla",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795091770192,
+      "tag": "0004_plantilla_repuestos",
+      "breakpoints": true
     }
   ]
 }
