@@ -210,7 +210,6 @@ export class PdfService {
       const sub: string[] = [];
       if (i.qty !== 1) sub.push(`${cantidad(i.qty)} × ${pesos(i.unitPrice)}`);
       if (i.discountPct) sub.push(`− ${cantidad(i.discountPct)}%`);
-      if (!PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded) sub.push('+ IVA si requiere factura');
       const rowH = Math.max(foto ? 52 : 0, hName + hMeta, sub.length ? 28 : 15) + 14;
       asegurar(rowH);
       const top = y + 7;
@@ -231,6 +230,9 @@ export class PdfService {
     };
 
     const comparativa = q.mode === 'COMPARATIVA' && q.groups.length > 1;
+    // El IVA se aclara una sola vez, en el recuadro del total (pedido de Leo: estaba repetido en cada ítem y en las aclaraciones)
+    const hayProductos = q.groups.some((g) => g.items.some((i) => PRODUCT_TYPES.includes(i.type) || i.ivaIncluded));
+    const hayMO = q.groups.some((g) => g.items.some((i) => !PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded));
     for (const g of q.groups) {
       if (comparativa) {
         asegurar(60);
@@ -254,8 +256,6 @@ export class PdfService {
       y += 14;
       doc.roundedRect(M, y, CW, 58, 14).fill(C.marino);
       etiqueta('Total', M + 18, y + 15, C.celeste);
-      const hayProductos = q.groups.some((g) => g.items.some((i) => PRODUCT_TYPES.includes(i.type) || i.ivaIncluded));
-      const hayMO = q.groups.some((g) => g.items.some((i) => !PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded));
       font('r', 10, C.celeste).text(hayProductos ? (hayMO ? 'Equipos con IVA incluido · mano de obra sin IVA' : 'Precio final, IVA incluido') : 'Si requiere factura, se suma el IVA', M + 18, y + 30, { width: CW / 2, lineBreak: false });
       font('x', 24, '#ffffff').text(pesos(total), M + CW / 2 - 18, y + 16, { width: CW / 2, align: 'right', lineBreak: false });
       y += 58;
@@ -287,7 +287,10 @@ export class PdfService {
     }
 
     // ---------------------------------------------------------- aclaraciones
-    const notas = [...q.notes];
+    // Sin comparativa, el recuadro del total ya dice cómo va el IVA: no se repite en las aclaraciones
+    const repiteTotal = (t: string) =>
+      !comparativa && ((hayProductos && /iva incluido/i.test(t)) || (!hayProductos && /factura/i.test(t) && /\biva\b/i.test(t)));
+    const notas = q.notes.filter((t) => !repiteTotal(t));
     if (q.usesDollar && q.dollarSell) {
       notas.push(`Los equipos cotizados en dólares se pasaron a pesos con el dólar BNA venta de ${pesos(q.dollarSell)}${q.dollarAt ? ` del ${fechaCorta(new Date(q.dollarAt))}` : ''}.`);
     }
