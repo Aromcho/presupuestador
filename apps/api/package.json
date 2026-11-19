@@ -2,7 +2,7 @@
   "name": "@gesetec/api",
   "version": "1.0.0",
   "private": true,
-  "description": "API REST (NestJS) — Presupuestador Gesetec Calderas",
+  "description": "API REST (NestJS) — Panel admin Gesetec Calderas",
   "scripts": {
     "build": "nest build",
     "start": "nest start",

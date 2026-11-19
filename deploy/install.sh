@@ -3,7 +3,7 @@
 #   sudo bash deploy/install.sh presupuestos.gesetecalderas.com
 # Hace todo: chequea puertos, crea los .env con secretos y contraseñas nuevas, la base de datos (PostgreSQL del
 # servidor o, si no hay, el contenedor de docker-compose), instala, compila, migra, carga los datos iniciales,
-# arranca con PM2, agrega SOLO el sitio del presupuestador a Nginx (nginx -t antes de recargar) y pide el HTTPS.
+# arranca con PM2, agrega SOLO el sitio del panel admin a Nginx (nginx -t antes de recargar) y pide el HTTPS.
 # No toca los otros sitios ni sus procesos. Se puede volver a correr sin problema.
 set -euo pipefail
 DOMAIN="${1:-presupuestos.gesetecalderas.com}"
@@ -88,7 +88,7 @@ say "Arrancando con PM2 (gesetec-api y gesetec-web)"
 GESETEC_API_PORT=$API_PORT GESETEC_WEB_PORT=$WEB_PORT pm2 startOrReload deploy/ecosystem.config.cjs --update-env
 pm2 save
 
-say "Nginx: sitio propio del presupuestador"
+say "Nginx: sitio propio del panel admin"
 CONF=/etc/nginx/sites-available/gesetec-presupuestos
 if [ ! -f "$CONF" ] || ! grep -q "managed by Certbot" "$CONF"; then
   sed -e "s#DOMINIO#$DOMAIN#g" -e "s#UPLOADS#$UPLOADS_DIR#g" -e "s#127.0.0.1:3130#127.0.0.1:$WEB_PORT#" -e "s#127.0.0.1:4130#127.0.0.1:$API_PORT#" deploy/nginx-presupuestos.conf > "$CONF"
@@ -107,7 +107,7 @@ sleep 3
 api=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$API_PORT/api/health || true)
 web=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$WEB_PORT/login || true)
 echo
-echo "✔ Presupuestador en https://$DOMAIN  (API: HTTP $api · panel: HTTP $web)"
+echo "✔ Panel admin en https://$DOMAIN  (API: HTTP $api · panel: HTTP $web)"
 if [ -n "$CRED" ]; then
   echo "  Usuarios (anotalos; se pueden cambiar en Administración → Usuarios):"
   echo "$CRED"

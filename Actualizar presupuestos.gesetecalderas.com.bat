@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Gesetec - actualizar el presupuestador
+title Gesetec - actualizar el panel admin
 cd /d "%~dp0"
 echo.
-echo  GESETEC - actualizar el presupuestador (no toca la base, los .env ni las fotos)
+echo  GESETEC - actualizar el panel admin (no toca la base, los .env ni las fotos)
 echo  -----------------------------------------------------------------------------
 where ssh >nul 2>nul || (echo  Falta el cliente SSH de Windows. & pause & exit /b 1)
 set /p SERVER= Usuario e IP del VPS (ej: root@123.45.67.89): 

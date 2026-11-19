@@ -39,11 +39,11 @@ function Login() {
       </div>
       <div className="relative w-full max-w-md">
         <img src="/brand/gesetec-logo.svg" alt="Gesetec Calderas" className="mb-10 h-14 w-auto" />
-        <p className="etiqueta text-celeste">Presupuestador</p>
+        <p className="etiqueta text-celeste">Panel admin</p>
         <h1 className="titular mt-3 text-5xl">
           Hola de <span className="degrade-llama">nuevo.</span>
         </h1>
-        <p className="mt-3 text-celeste">Ingresá para armar y mandar presupuestos.</p>
+        <p className="mt-3 text-celeste">Ingresá al panel de Gesetec Calderas.</p>
         <form onSubmit={entrar} className="mt-8 flex flex-col gap-4 rounded-3xl border border-linea bg-marino p-6">
           <Campo etiqueta="Email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <Campo etiqueta="Contraseña" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />

@@ -355,7 +355,7 @@ export class ExcelService {
     const ctx = await this.catalog.priceContext();
     const fecha = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Presupuestador Gesetec';
+    wb.creator = 'Panel admin Gesetec';
     const ws = wb.addWorksheet('Catálogo');
     this.styleSheet(ws, `GESETEC CALDERAS · Catálogo y precios · ${fecha}${ctx.dollar ? ` · Dólar BNA venta $${ctx.dollar}` : ''}`, [
       { header: 'Código', key: 'code', width: 14 },
@@ -413,7 +413,7 @@ export class ExcelService {
       .filter((r) => !filter.status || r.status === filter.status);
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Presupuestador Gesetec';
+    wb.creator = 'Panel admin Gesetec';
     const fecha = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
     const ws = wb.addWorksheet('Presupuestos');
     this.styleSheet(ws, `GESETEC CALDERAS · Presupuestos · ${fecha}`, [
@@ -491,7 +491,7 @@ export class ExcelService {
       .from(clients)
       .orderBy(asc(clients.name));
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Presupuestador Gesetec';
+    wb.creator = 'Panel admin Gesetec';
     const fecha = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
     const ws = wb.addWorksheet('Clientes');
     this.styleSheet(ws, `GESETEC CALDERAS · Clientes · ${fecha}`, [

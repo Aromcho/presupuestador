@@ -437,7 +437,7 @@ class MarketingService {
       this.db.select().from(marketingPending).orderBy(asc(marketingPending.sortOrder)),
     ]);
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Presupuestador Gesetec';
+    wb.creator = 'Panel admin Gesetec';
     const estilo = (ws: ExcelJS.Worksheet, anchos: number[]) => {
       const hr = ws.getRow(1);
       hr.eachCell((c) => {

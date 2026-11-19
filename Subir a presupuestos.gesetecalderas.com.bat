@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Gesetec - subir el presupuestador a presupuestos.gesetecalderas.com
+title Gesetec - subir el panel admin a presupuestos.gesetecalderas.com
 cd /d "%~dp0"
 echo.
-echo  GESETEC - instalar el presupuestador en https://presupuestos.gesetecalderas.com
+echo  GESETEC - instalar el panel admin en https://presupuestos.gesetecalderas.com
 echo  ------------------------------------------------------------------------------
 echo  Antes: el subdominio presupuestos.gesetecalderas.com tiene que apuntar (registro A) a la IP del VPS.
 echo.

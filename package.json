@@ -1,8 +1,8 @@
 {
-  "name": "gesetec-presupuestador",
+  "name": "gesetec-panel-admin",
   "private": true,
   "version": "1.0.0",
-  "description": "Presupuestador de Gesetec Calderas: API + panel (Next.js 16 + NestJS 11 + PostgreSQL)",
+  "description": "Panel admin de Gesetec Calderas: API + panel (Next.js 16 + NestJS 11 + PostgreSQL)",
   "workspaces": [
     "apps/*"
   ],

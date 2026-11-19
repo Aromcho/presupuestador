@@ -1,5 +1,5 @@
 /**
- * Modelo de datos — Presupuestador Gesetec Calderas
+ * Modelo de datos — Panel admin Gesetec Calderas
  * PostgreSQL + Drizzle ORM. Los precios finales se guardan en pesos enteros (ARS);
  * los precios de lista de los proveedores, en su moneda (ARS o USD) con 2 decimales.
  */

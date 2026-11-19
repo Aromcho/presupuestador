@@ -28,7 +28,7 @@ export default function Inicio() {
   return (
     <>
       <div className="flex flex-col gap-2.5">
-        <Etiqueta>Presupuestador</Etiqueta>
+        <Etiqueta>Panel admin</Etiqueta>
         <h1 className="titular text-5xl md:text-6xl">
           {saludo()}, <span className="degrade-llama">{nombre}.</span>
         </h1>

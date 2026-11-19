@@ -54,7 +54,7 @@ export function Shell({ children }: { children: ReactNode }) {
     if (me.isError) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
   }, [me.isError, pathname, router]);
 
-  if (me.isLoading || !me.data) return <Cargando texto="Abriendo el presupuestador…" />;
+  if (me.isLoading || !me.data) return <Cargando texto="Abriendo el panel…" />;
   const admin = me.data.role === 'ADMIN';
   const nav = NAV.filter((n) => !n.admin || admin);
 

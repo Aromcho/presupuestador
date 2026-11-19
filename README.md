@@ -1,6 +1,8 @@
-# Presupuestador · Gesetec Calderas
+# Panel admin · Gesetec Calderas
 
-Sistema para armar y mandar presupuestos con la marca de Gesetec en minutos, desde la compu o el celular. Lo usan Leo (administrador) y administración (ventas). Va en `presupuestos.gesetecalderas.com`.
+Panel de administración de Gesetec: presupuestos con la marca en minutos, catálogo, clientes y la sección de marketing y redes, desde la compu o el celular. Lo usan Leo (administrador) y administración (ventas). Va en `presupuestos.gesetecalderas.com`.
+
+El repo (`Aromcho/presupuestador`), la carpeta del VPS (`/root/gesetec-presupuestador`) y el deploy del MCP (`presupuestador`) mantienen el nombre viejo: son nombres técnicos y cambiarlos rompería el deploy.
 
 Sigue la misma línea que Farmacia Amancio Fernández y Brox Padel, con el diseño de gesetecalderas.com (Archivo variable, azul noche, la llama y el rojo para la acción principal).
 

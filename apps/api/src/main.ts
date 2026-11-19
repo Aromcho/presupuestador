@@ -38,7 +38,7 @@ async function bootstrap() {
   app.useStaticAssets(uploads, { prefix: '/uploads', maxAge: '365d', immutable: true });
 
   const doc = new DocumentBuilder()
-    .setTitle('Presupuestador Gesetec — API')
+    .setTitle('Panel admin Gesetec — API')
     .setDescription('Catálogo, listas de precios, dólar BNA, Excel, plantillas y presupuestos')
     .setVersion('1.0')
     .addCookieAuth('gc_session')

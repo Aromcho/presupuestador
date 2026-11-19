@@ -1,4 +1,4 @@
-# Plan y decisiones · Presupuestador Gesetec
+# Plan y decisiones · Panel admin Gesetec
 
 El plan técnico completo está en el proyecto de Claude ("plan-tecnico-presupuestador.md") y las pantallas, en el artifact "Presupuestador Gesetec · pantallas".
 

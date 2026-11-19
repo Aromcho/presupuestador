@@ -14,7 +14,7 @@ const archivo = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: 'Presupuestador · Gesetec Calderas', template: '%s · Presupuestador Gesetec' },
+  title: { default: 'Panel admin · Gesetec Calderas', template: '%s · Panel admin Gesetec' },
   robots: { index: false, follow: false },
   icons: { icon: '/brand/gesetec-llama.svg' },
 };
