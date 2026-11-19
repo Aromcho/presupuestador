@@ -106,6 +106,7 @@ const PENDING_COLS: [string, string, string][] = [
   ['afecta', 'affects', 'Afecta a'],
   ['quien', 'owner', 'Quién lo resuelve'],
   ['estado', 'status', 'Estado'],
+  ['respuesta', 'answer', 'Respuesta'],
 ];
 
 export interface Tabla {
@@ -385,7 +386,8 @@ class MarketingService {
         const prev = await tx.select().from(marketingPending);
         const porClave = new Map(prev.map((p) => [p.key, p]));
         const claves = new Set<string>();
-        for (const [i, data] of pendientes.entries()) {
+        for (const [i, fila] of pendientes.entries()) {
+          const { answer: respuesta, ...data } = fila;
           let key = slugify(`${data.kind ?? ''} ${data.topic ?? data.detail ?? ''}`).slice(0, 120) || `pendiente-${i}`;
           while (claves.has(key)) key = `${key}-${i}`;
           claves.add(key);
@@ -394,10 +396,15 @@ class MarketingService {
           if (previo) {
             await tx
               .update(marketingPending)
-              .set({ data, sortOrder: i, status: previo.fromPanel ? previo.status : (delArchivo ?? previo.status) })
+              .set({
+                data,
+                sortOrder: i,
+                status: previo.fromPanel ? previo.status : (delArchivo ?? previo.status),
+                answer: previo.fromPanel && previo.answer ? previo.answer : respuesta || previo.answer,
+              })
               .where(eq(marketingPending.id, previo.id));
           } else {
-            await tx.insert(marketingPending).values({ key, data, sortOrder: i, status: delArchivo ?? 'Abierto' });
+            await tx.insert(marketingPending).values({ key, data, sortOrder: i, status: delArchivo ?? 'Abierto', answer: respuesta || null });
           }
         }
         const sobran = prev.filter((p) => !claves.has(p.key)).map((p) => p.id);
@@ -461,8 +468,9 @@ class MarketingService {
     estilo(cal, [8, 12, 11, 7, 10, 22, 22, 14, 11, 20, 46, 26, 13, 50, 50, 60, 34, 70, 46, 26, 26, 40, 60, 10, 10, 34, 9, 12, 14, 40]);
 
     const pen = wb.addWorksheet('Pendientes');
-    pen.addRow([...PENDING_COLS.filter(([, k]) => k !== 'status').map(([, , t]) => t), 'Estado', 'Respuesta']);
-    for (const p of pending) pen.addRow([...PENDING_COLS.filter(([, k]) => k !== 'status').map(([, k]) => p.data[k] ?? ''), p.status, p.answer ?? '']);
+    const colsPen = PENDING_COLS.filter(([, k]) => k !== 'status' && k !== 'answer');
+    pen.addRow([...colsPen.map(([, , t]) => t), 'Estado', 'Respuesta']);
+    for (const p of pending) pen.addRow([...colsPen.map(([, k]) => p.data[k] ?? ''), p.status, p.answer ?? '']);
     estilo(pen, [18, 30, 90, 26, 18, 12, 50]);
 
     return wb.xlsx.writeBuffer();
