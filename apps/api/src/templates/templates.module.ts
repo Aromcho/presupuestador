@@ -11,7 +11,7 @@ import { slugify } from '../common/utils/text';
 import { Database, InjectDb } from '../db/db.module';
 import { NoteRule, notes, QuoteMode, templateItems, templates } from '../db/schema';
 
-const ICONS = ['instalacion', 'caldera_pie', 'piscina', 'radiador', 'mantenimiento', 'temporada', 'columnas', 'llave', 'llama'];
+const ICONS = ['instalacion', 'caldera_pie', 'piscina', 'radiador', 'mantenimiento', 'temporada', 'columnas', 'llave', 'llama', 'caja'];
 
 class TemplateItemDto {
   @IsUUID() itemId: string;

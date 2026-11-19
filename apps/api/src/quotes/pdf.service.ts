@@ -183,7 +183,7 @@ export class PdfService {
     let yc = doc.y + 2;
     const datos = [c?.phone, c?.zone, c?.address].filter(Boolean).join(' · ');
     if (datos) {
-      font('r', 9.5, C.gris).text(datos, M, yc, { width: CW });
+      font('r', 10.5, C.gris).text(datos, M, yc, { width: CW });
       yc = doc.y;
     }
     y = yc + 18;
@@ -192,7 +192,7 @@ export class PdfService {
     font('x', 20).text(q.title, M, y, { width: CW });
     y = doc.y + 4;
     if (q.mode === 'COMPARATIVA' && q.groups.length > 1) {
-      font('r', 9.5, C.gris).text('Compará las opciones: cada una tiene su precio final.', M, y, { width: CW });
+      font('r', 10.5, C.gris).text('Compará las opciones: cada una tiene su precio final.', M, y, { width: CW });
       y = doc.y;
     }
     y += 14;
@@ -203,15 +203,15 @@ export class PdfService {
       const tx = M + (foto ? 62 : 0);
       const tw = CW - (tx - M) - 140;
       const meta = [i.code, i.description].filter(Boolean).join(' · ');
-      font('b', 10.5);
+      font('b', 11.5);
       const hName = doc.heightOfString(i.name, { width: tw });
-      font('r', 8.5);
-      const hMeta = meta ? doc.heightOfString(meta, { width: tw }) + 2 : 0;
+      font('r', 9.5);
+      const hMeta = meta ? doc.heightOfString(meta, { width: tw }) + 3 : 0;
       const sub: string[] = [];
       if (i.qty !== 1) sub.push(`${cantidad(i.qty)} × ${pesos(i.unitPrice)}`);
       if (i.discountPct) sub.push(`− ${cantidad(i.discountPct)}%`);
       if (!PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded) sub.push('+ IVA si requiere factura');
-      const rowH = Math.max(foto ? 52 : 0, hName + hMeta, sub.length ? 26 : 14) + 14;
+      const rowH = Math.max(foto ? 52 : 0, hName + hMeta, sub.length ? 28 : 15) + 14;
       asegurar(rowH);
       const top = y + 7;
       if (foto) {
@@ -221,11 +221,11 @@ export class PdfService {
         doc.image(foto, M + 3, top + 3, { fit: [44, 44], align: 'center', valign: 'center' });
         doc.restore();
       }
-      font('b', 10.5).text(i.name, tx, top, { width: tw });
-      if (meta) font('r', 8.5, C.gris).text(meta, tx, doc.y + 2, { width: tw });
+      font('b', 11.5).text(i.name, tx, top, { width: tw });
+      if (meta) font('r', 9.5, '#46557A').text(meta, tx, doc.y + 3, { width: tw });
       const px = W - M - 130;
-      font('b', 11.5).text(pesos(i.total), px, top, { width: 130, align: 'right', lineBreak: false });
-      if (sub.length) font('r', 8, C.gris).text(sub.join(' · '), px - 60, top + 15, { width: 190, align: 'right', lineBreak: false });
+      font('b', 12.5).text(pesos(i.total), px, top, { width: 130, align: 'right', lineBreak: false });
+      if (sub.length) font('r', 9, C.gris).text(sub.join(' · '), px - 70, top + 17, { width: 200, align: 'right', lineBreak: false });
       y += rowH;
       doc.moveTo(M, y).lineTo(W - M, y).lineWidth(0.6).strokeColor(C.linea).stroke();
     };
@@ -256,7 +256,7 @@ export class PdfService {
       etiqueta('Total', M + 18, y + 15, C.celeste);
       const hayProductos = q.groups.some((g) => g.items.some((i) => PRODUCT_TYPES.includes(i.type) || i.ivaIncluded));
       const hayMO = q.groups.some((g) => g.items.some((i) => !PRODUCT_TYPES.includes(i.type) && !i.ivaIncluded));
-      font('r', 9, C.celeste).text(hayProductos ? (hayMO ? 'Equipos con IVA incluido · mano de obra sin IVA' : 'Precio final, IVA incluido') : 'Si requiere factura, se suma el IVA', M + 18, y + 30, { width: CW / 2, lineBreak: false });
+      font('r', 10, C.celeste).text(hayProductos ? (hayMO ? 'Equipos con IVA incluido · mano de obra sin IVA' : 'Precio final, IVA incluido') : 'Si requiere factura, se suma el IVA', M + 18, y + 30, { width: CW / 2, lineBreak: false });
       font('x', 24, '#ffffff').text(pesos(total), M + CW / 2 - 18, y + 16, { width: CW / 2, align: 'right', lineBreak: false });
       y += 58;
     }
@@ -269,7 +269,7 @@ export class PdfService {
       y += 16;
       const colW = CW / 2 - 8;
       for (let n = 0; n < q.seIncluye.length; n += 2) {
-        font('r', 10);
+        font('r', 10.5);
         const par = q.seIncluye.slice(n, n + 2);
         const h = Math.max(...par.map((t) => doc.heightOfString(t, { width: colW - 20 }))) + 7;
         asegurar(h);
@@ -279,7 +279,7 @@ export class PdfService {
           doc.circle(x + 6, y + 6, 6).fill('#E6EEFB');
           doc.moveTo(x + 3.2, y + 6.2).lineTo(x + 5.3, y + 8.3).lineTo(x + 9, y + 4).lineWidth(1.4).strokeColor(C.azul).stroke();
           doc.restore();
-          font('r', 10).text(t, x + 18, y + 0.5, { width: colW - 20 });
+          font('r', 10.5).text(t, x + 18, y + 0.5, { width: colW - 20 });
         });
         y += h;
       }
@@ -292,26 +292,47 @@ export class PdfService {
       notas.push(`Los equipos cotizados en dólares se pasaron a pesos con el dólar BNA venta de ${pesos(q.dollarSell)}${q.dollarAt ? ` del ${fechaCorta(new Date(q.dollarAt))}` : ''}.`);
     }
     if (notas.length) {
-      asegurar(36);
-      etiqueta('Aclaraciones', M, y, C.azul);
-      y += 15;
-      for (const t of notas) {
-        font('r', 9);
-        const h = doc.heightOfString(t, { width: CW - 12 }) + 4;
-        asegurar(h);
-        doc.circle(M + 2.5, y + 5, 1.6).fill(C.rojo);
-        font('r', 9, C.gris).text(t, M + 12, y, { width: CW - 12 });
-        y += h;
+      // Tarjeta destacada (pedido de Leo: que las aclaraciones se lean bien y se noten)
+      const tx = M + 34;
+      const tw = CW - 34 - 18;
+      font('r', 10.5);
+      const alturas = notas.map((t) => doc.heightOfString(t, { width: tw }) + 6);
+      const pad = 16;
+      const cabecera = 22;
+      let i = 0;
+      while (i < notas.length) {
+        // lo que entra en esta página (si no entra ninguna, página nueva)
+        if (y + pad + cabecera + alturas[i] + pad > BOTTOM) {
+          doc.addPage();
+          y = encabezado(false);
+        }
+        let fin = i;
+        let alto = pad + cabecera;
+        while (fin < notas.length && y + alto + alturas[fin] + pad <= BOTTOM) alto += alturas[fin++];
+        alto += pad - 6;
+        doc.roundedRect(M, y, CW, alto, 12).fill(C.fondo);
+        doc.save();
+        doc.roundedRect(M, y, CW, alto, 12).clip();
+        doc.rect(M, y, 4, alto).fill(C.rojo);
+        doc.restore();
+        etiqueta(i === 0 ? 'Aclaraciones' : 'Aclaraciones (continuación)', M + 18, y + pad, C.azul);
+        let ty = y + pad + cabecera;
+        for (let k = i; k < fin; k++) {
+          doc.circle(M + 24, ty + 6.5, 2.4).fill(C.rojo);
+          font('r', 10.5, C.texto).text(notas[k], tx, ty, { width: tw });
+          ty += alturas[k];
+        }
+        y += alto + 12;
+        i = fin;
       }
-      y += 10;
     }
 
     if (q.observations) {
-      font('r', 9.5);
+      font('r', 10.5);
       const h = doc.heightOfString(q.observations, { width: CW }) + 20;
       asegurar(h);
       etiqueta('Observaciones', M, y, C.azul);
-      font('r', 9.5).text(q.observations, M, y + 15, { width: CW });
+      font('r', 10.5).text(q.observations, M, y + 15, { width: CW });
       y = doc.y + 10;
     }
 

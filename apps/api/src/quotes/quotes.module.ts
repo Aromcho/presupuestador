@@ -9,9 +9,22 @@ import { PdfService } from './pdf.service';
 import { QuoteQuery, SaveQuoteDto, StatusDto } from './quotes.dto';
 import { QuoteDetail, QuotesService } from './quotes.service';
 
-function sendPdf(res: Response, pdf: Buffer, q: QuoteDetail, download: boolean) {
+/** Nombre del archivo: "Presupuesto-Gesetec-Diego-Chervin.pdf" */
+function nombrePdf(q: QuoteDetail) {
   const cliente = (q.client?.name ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const name = `Presupuesto-Gesetec${cliente ? `-${cliente}` : ''}.pdf`;
+  return `Presupuesto-Gesetec${cliente ? `-${cliente}` : ''}.pdf`;
+}
+
+/**
+ * El PDF se sirve en una URL que termina con el nombre del archivo, porque el celular (iPhone sobre todo)
+ * usa la última parte de la URL como nombre al compartir: sin esto el archivo salía como "pdf.pdf".
+ */
+function aNombre(res: Response, base: string, q: QuoteDetail, descargar: string | undefined) {
+  res.redirect(302, `${base}/${encodeURIComponent(nombrePdf(q))}${descargar === '1' ? '?descargar=1' : ''}`);
+}
+
+function sendPdf(res: Response, pdf: Buffer, q: QuoteDetail, download: boolean) {
+  const name = nombrePdf(q);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${name}"`);
   res.setHeader('Cache-Control', 'private, no-store');
@@ -38,6 +51,9 @@ class QuotesController {
     return this.svc.detail(id);
   }
   @Get(':id/pdf') async file(@Param('id', ParseUUIDPipe) id: string, @Query('descargar') descargar: string | undefined, @Res() res: Response) {
+    aNombre(res, `/api/quotes/${id}/pdf`, await this.svc.detail(id), descargar);
+  }
+  @Get(':id/pdf/:archivo') async fileNombre(@Param('id', ParseUUIDPipe) id: string, @Query('descargar') descargar: string | undefined, @Res() res: Response) {
     const q = await this.svc.detail(id);
     sendPdf(res, await this.pdf.render(q), q, descargar === '1');
   }
@@ -74,7 +90,11 @@ class PublicQuoteController {
   ) {}
 
   @Get(':token') async file(@Param('token') token: string, @Query('descargar') descargar: string | undefined, @Res() res: Response) {
-    const q = await this.svc.byToken(token.replace(/\.pdf$/i, '').slice(0, 64));
+    const t = token.replace(/\.pdf$/i, '').slice(0, 64);
+    aNombre(res, `/p/${t}`, await this.svc.byToken(t), descargar);
+  }
+  @Get(':token/:archivo') async fileNombre(@Param('token') token: string, @Query('descargar') descargar: string | undefined, @Res() res: Response) {
+    const q = await this.svc.byToken(token.slice(0, 64));
     sendPdf(res, await this.pdf.render(q), q, descargar === '1');
   }
 }

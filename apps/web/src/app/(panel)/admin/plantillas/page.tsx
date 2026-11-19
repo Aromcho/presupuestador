@@ -17,6 +17,7 @@ const ICONOS: { id: IconoNombre; t: string }[] = [
   { id: 'columnas', t: 'Comparativa' },
   { id: 'llave', t: 'Reparación' },
   { id: 'llama', t: 'Gas' },
+  { id: 'caja', t: 'Repuestos' },
 ];
 
 export default function Plantillas() {

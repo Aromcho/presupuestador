@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
       { source: '/uploads/:path*', destination: `${API_URL}/uploads/:path*` },
       // Link público del presupuesto que recibe el cliente por WhatsApp
       { source: '/p/:token', destination: `${API_URL}/api/p/:token` },
+      // …que redirige a una URL con el nombre del archivo (así se comparte como "Presupuesto-Gesetec-Cliente.pdf")
+      { source: '/p/:token/:archivo', destination: `${API_URL}/api/p/:token/:archivo` },
     ];
   },
   async headers() {
