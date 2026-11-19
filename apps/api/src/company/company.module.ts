@@ -28,7 +28,7 @@ class PresupuestosDto {
   @IsOptional() @IsInt() @Min(1) proximoNumero?: number;
   @IsOptional() @IsInt() @Min(1) @Max(24 * 60) validezHoras?: number;
   @IsOptional() @IsString() @MaxLength(200) formaPago?: string;
-  @IsOptional() @IsIn([1, 10, 100, 1000]) redondeo?: number;
+  @IsOptional() @IsIn([1, 10, 100, 1000, -1]) redondeo?: number;
   @IsOptional() @IsString() @MaxLength(200) pie?: string;
 }
 

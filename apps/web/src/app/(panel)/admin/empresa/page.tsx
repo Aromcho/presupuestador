@@ -68,12 +68,17 @@ export default function EmpresaPage() {
         <div className="flex flex-col gap-2">
           <Etiqueta className="text-humo">Redondeo de los precios en pesos</Etiqueta>
           <div className="flex flex-wrap gap-2">
-            {[1, 100, 1000].map((r) => (
+            {[1, 100, 1000, -1].map((r) => (
               <Chip key={r} activo={p.redondeo === r} onClick={() => setP({ ...p, redondeo: r })}>
-                {r === 1 ? 'Sin redondeo' : `A los $${r.toLocaleString('es-AR')}`}
+                {r === 1 ? 'Sin redondeo' : r === -1 ? 'Hacia arriba, a números redondos' : `A los $${r.toLocaleString('es-AR')}`}
               </Chip>
             ))}
           </div>
+          {p.redondeo === -1 && (
+            <p className="text-sm text-humo">
+              Para los precios que vienen en dólares: hasta $100.000 sube al $1.000 siguiente, hasta $1.000.000 a los $5.000 y desde ahí a los $50.000 (por ejemplo, $4.253.000 queda en $4.300.000). Los precios en pesos, como el tarifario del service, no cambian.
+            </p>
+          )}
         </div>
       </Tarjeta>
     </>

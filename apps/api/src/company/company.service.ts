@@ -23,7 +23,7 @@ export interface AjustesPresupuestos {
   proximoNumero: number;
   validezHoras: number;
   formaPago: string;
-  /** Redondeo de los precios en pesos (1, 100 o 1000) */
+  /** Redondeo de los precios en pesos (1, 100 o 1000; -1 = hacia arriba a números redondos, en los precios en dólares) */
   redondeo: number;
   pie: string;
 }
